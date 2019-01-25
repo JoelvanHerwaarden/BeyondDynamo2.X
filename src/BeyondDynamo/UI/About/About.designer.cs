@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.LinkedIn_Label = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
+            this.GitHub_Label = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -48,17 +48,20 @@
             this.LinkedIn_Label.MouseEnter += new System.EventHandler(this.LinkedIn_Label_MouseEnter);
             this.LinkedIn_Label.MouseLeave += new System.EventHandler(this.LinkedIn_Label_MouseLeave);
             // 
-            // label1
+            // GitHub_Label
             // 
-            this.label1.AutoSize = true;
-            this.label1.BackColor = System.Drawing.Color.Transparent;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(669, 432);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(135, 20);
-            this.label1.TabIndex = 7;
-            this.label1.Text = "Coming Soon...";
+            this.GitHub_Label.AutoSize = true;
+            this.GitHub_Label.BackColor = System.Drawing.Color.Transparent;
+            this.GitHub_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.GitHub_Label.ForeColor = System.Drawing.Color.White;
+            this.GitHub_Label.Location = new System.Drawing.Point(669, 432);
+            this.GitHub_Label.Name = "GitHub_Label";
+            this.GitHub_Label.Size = new System.Drawing.Size(243, 20);
+            this.GitHub_Label.TabIndex = 7;
+            this.GitHub_Label.Text = "Beyond Dynamo 2.X GitHub";
+            this.GitHub_Label.Click += new System.EventHandler(this.GitHub_Label_Click);
+            this.GitHub_Label.MouseEnter += new System.EventHandler(this.GitHub_Label_MouseEnter);
+            this.GitHub_Label.MouseLeave += new System.EventHandler(this.GitHub_Label_MouseLeave);
             // 
             // label2
             // 
@@ -79,7 +82,7 @@
             this.BackgroundImage = global::BeyondDynamo.resources.BeyondDynamo_Banner;
             this.ClientSize = new System.Drawing.Size(1086, 495);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.GitHub_Label);
             this.Controls.Add(this.LinkedIn_Label);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -94,7 +97,7 @@
 
         #endregion
         private System.Windows.Forms.Label LinkedIn_Label;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label GitHub_Label;
         private System.Windows.Forms.Label label2;
     }
 }

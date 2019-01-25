@@ -89,6 +89,7 @@ namespace BeyondDynamo
         /// <param name="DynamoFilePath"></param>
         private static void ImportXMLDynamo(DynamoViewModel viewModel, string DynamoFilePath)
         {
+            WorkspaceViewModel workspaceViewModel = viewModel.CurrentSpaceViewModel;
             WorkspaceModel model = viewModel.Model.CurrentWorkspace;
 
             //Create two lists for the Selection of the imported model
@@ -128,8 +129,9 @@ namespace BeyondDynamo
             # region MAKE ALL IMPORTED ITEMS THE NEW SELECTION
             //Check Groups
             #region
-            foreach (AnnotationModel group in model.Annotations)
+            foreach (AnnotationViewModel groupView in workspaceViewModel.Annotations)
             {
+                AnnotationModel group = groupView.AnnotationModel;
                 string itemGuid = group.GUID.ToString();
                 foreach (string guid in guidList)
                 {
@@ -513,14 +515,11 @@ namespace BeyondDynamo
         /// Mark all selected nodes as input nodes
         /// </summary>
         /// <param name="model"></param>
-        private static void MarkAsInput(WorkspaceModel model)
+        public static void MarkAsInput(WorkspaceModel model)
         {
             foreach (NodeModel node in model.CurrentSelection)
             {
-                if (node.IsInputNode)
-                {
-                    node.IsSetAsInput = true;
-                }
+                node.IsSetAsInput = true;
             }
         }
 
@@ -528,29 +527,23 @@ namespace BeyondDynamo
         /// Mark all selected nodes as output nodes
         /// </summary>
         /// <param name="model"></param>
-        private static void MarkAsOutput(WorkspaceModel model)
+        public static void MarkAsOutput(WorkspaceModel model)
         {
             foreach (NodeModel node in model.CurrentSelection)
             {
-                if (node.IsOutputNode)
-                {
-                    node.IsSetAsOutput = true;
-                }
+                node.IsSetAsOutput = true;
             }
         }
-        
+
         /// <summary>
         /// Unmark all selected nodes as input nodes
         /// </summary>
         /// <param name="model"></param>
-        private static void UnMarkAsInput(WorkspaceModel model)
+        public static void UnMarkAsInput(WorkspaceModel model)
         {
             foreach (NodeModel node in model.CurrentSelection)
             {
-                if (node.IsInputNode)
-                {
-                    node.IsSetAsInput = false;
-                }
+               node.IsSetAsInput = false;
             }
         }
         
@@ -558,14 +551,13 @@ namespace BeyondDynamo
         /// Unmark all selected nodes as output nodes
         /// </summary>
         /// <param name="model"></param>
-        private static void UnMarkAsOutput(WorkspaceModel model)
+        public static void UnMarkAsOutput(WorkspaceModel model)
         {
             foreach (NodeModel node in model.CurrentSelection)
             {
-                if (node.IsOutputNode)
-                {
-                    node.IsSetAsOutput = false;
-                }
+                node.Description = "This is Description";
+                node.ToolTipText = "This is the ToolTip";
+                
             }
         }
     }

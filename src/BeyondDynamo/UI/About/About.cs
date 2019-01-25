@@ -62,6 +62,23 @@ namespace BeyondDynamo.UI.About
             }
         }
         #endregion
-        
+
+        #region GitHub Label Events
+        private void GitHub_Label_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("www.github.com/JoelvanHerwaarden/BeyondDynamo2.X");
+        }
+
+        private void GitHub_Label_MouseEnter(object sender, EventArgs e)
+        {
+            GitHub_Label.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFC8C8C8");
+        }
+
+        private void GitHub_Label_MouseLeave(object sender, EventArgs e)
+        {
+            GitHub_Label.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
+        }
+        #endregion
+
     }
 }

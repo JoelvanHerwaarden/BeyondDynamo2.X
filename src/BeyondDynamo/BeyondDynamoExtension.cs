@@ -50,6 +50,26 @@ namespace BeyondDynamo
         private MenuItem OrderPlayerInput;
 
         /// <summary>
+        /// Mark input nodes Menu Item
+        /// </summary>
+        private MenuItem MarkInputNodes;
+
+        /// <summary>
+        /// Unmark input nodes Menu Item
+        /// </summary>
+        private MenuItem UnmarkInputNodes;
+
+        /// <summary>
+        /// Mark output nodes Menu Item
+        /// </summary>
+        private MenuItem MarkOutputNodes;
+
+        /// <summary>
+        /// Unmark output nodes Menu Item
+        /// </summary>
+        private MenuItem UnmarkOutputNodes;
+
+        /// <summary>
         /// About Window Menu Item
         /// </summary>
         private MenuItem AboutItem;
@@ -79,7 +99,7 @@ namespace BeyondDynamo
         {
             get
             {
-                return "Remove Trace Data";
+                return "Beyond Dynamo 2.0";
             }
         }
         #endregion
@@ -93,8 +113,7 @@ namespace BeyondDynamo
             BDmenuItem = new MenuItem { Header = "Beyond Dynamo" };
             DynamoViewModel VM = p.DynamoWindow.DataContext as DynamoViewModel;
 
-            //This can be run anytime
-            #region
+            #region THIS CAN BE RUN ANYTIME
 
             OrderPlayerInput = new MenuItem { Header = "Order Input/Output Nodes" };
             OrderPlayerInput.Click += (sender, args) =>
@@ -128,30 +147,28 @@ namespace BeyondDynamo
                     }
                 }
             };
+            BDmenuItem.Items.Add(OrderPlayerInput);
 
-            AboutItem = new MenuItem { Header = "About Beyond Dynamo" };
-            AboutItem.Click += (sender, args) =>
-            {
-                //Show the About dialog
-                About about = new About();
-                about.Show();
-            };
-            # endregion
+            BDmenuItem.Items.Add(new Separator());
+            BDmenuItem.Items.Add(new Separator());
+            #endregion
 
-            //These can only run inside a Graph
-            #region
+
+            # region THESE FUNCTION ONLY WORK INSIDE A SCRIPT
 
             GroupColor = new MenuItem { Header = "Change Group Color" };
             GroupColor.Click += (sender, args) =>
             {
                 BeyondDynamo.BeyondDynamoFunctions.ChangeGroupColor(VM.CurrentSpaceViewModel);
             };
+            BDmenuItem.Items.Add(GroupColor);
 
             ScriptImport = new MenuItem { Header = "Import From Script" };
             ScriptImport.Click += (sender, args) =>
             {
                 BeyondDynamoFunctions.ImportFromScript(VM);
             };
+            BDmenuItem.Items.Add(ScriptImport);
 
             EditNotes = new MenuItem { Header = "Edit Note Text" };
             EditNotes.Click += (sender, args) =>
@@ -165,39 +182,64 @@ namespace BeyondDynamo
 
                 BeyondDynamoFunctions.CallTextEditor(VM.Model);
             };
+            BDmenuItem.Items.Add(EditNotes);
 
             FreezeNodes = new MenuItem { Header = "Freeze Multiple Nodes" };
             FreezeNodes.Click += (sender, args) =>
             {
                 BeyondDynamoFunctions.FreezeNodes(VM.Model);
             };
+            BDmenuItem.Items.Add(FreezeNodes);
 
             UnfreezeNodes = new MenuItem { Header = "Unfreeze Multiple Nodes" };
             UnfreezeNodes.Click += (sender, args) =>
             {
                 BeyondDynamoFunctions.UnfreezeNodes(VM.Model);
             };
-            #endregion
-
-            #region
-            //App Extensions
-            BDmenuItem.Items.Add(OrderPlayerInput);
-            BDmenuItem.Items.Add(new Separator());
-            BDmenuItem.Items.Add(new Separator());
-
-            //Graph Extensions
-            BDmenuItem.Items.Add(GroupColor);
-            BDmenuItem.Items.Add(ScriptImport);
-            BDmenuItem.Items.Add(EditNotes);
-            BDmenuItem.Items.Add(FreezeNodes);
             BDmenuItem.Items.Add(UnfreezeNodes);
 
-            //Main Extension
+            //MarkInputNodes = new MenuItem { Header = "Mark Multiple Nodes as Input " };
+            //MarkInputNodes.Click += (sender, args) =>
+            //{
+            //    BeyondDynamo.BeyondDynamoFunctions.MarkAsInput(VM.Model.CurrentWorkspace);
+            //};
+            //BDmenuItem.Items.Add(MarkInputNodes);
+
+            //UnmarkInputNodes = new MenuItem { Header = "Unmark Multiple Nodes as Input " };
+            //UnmarkInputNodes.Click += (sender, args) =>
+            //{
+            //    BeyondDynamo.BeyondDynamoFunctions.UnMarkAsInput(VM.Model.CurrentWorkspace);
+            //};
+            //BDmenuItem.Items.Add(UnmarkInputNodes);
+
+            //MarkOutputNodes = new MenuItem { Header = "Mark Multiple Nodes as Output" };
+            //MarkOutputNodes.Click += (sender, args) =>
+            //{
+            //    BeyondDynamo.BeyondDynamoFunctions.MarkAsOutput(VM.Model.CurrentWorkspace);
+            //};
+            //BDmenuItem.Items.Add(MarkOutputNodes);
+
+            //UnmarkOutputNodes = new MenuItem { Header = "Unmark Multiple Nodes as Output" };
+            //UnmarkOutputNodes.Click += (sender, args) =>
+            //{
+            //    BeyondDynamo.BeyondDynamoFunctions.UnMarkAsOutput(VM.Model.CurrentWorkspace);
+            //};
+            //BDmenuItem.Items.Add(UnmarkOutputNodes);
+            #endregion 
+            
+            AboutItem = new MenuItem { Header = "About Beyond Dynamo" };
+            AboutItem.Click += (sender, args) =>
+            {
+                //Show the About dialog
+                About about = new About();
+                about.Show();
+            };
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(AboutItem);
+
             p.dynamoMenu.Items.Add(BDmenuItem);
-            #endregion
+            
         }
 
     }
