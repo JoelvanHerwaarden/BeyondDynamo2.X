@@ -12,6 +12,9 @@ using Newtonsoft.Json.Linq;
 
 namespace BeyondDynamo
 {
+    /// <summary>
+    /// This Class is the Main Extension for Dynamo
+    /// </summary>
     public class BeyondDynamoExtension : IViewExtension
     {
         /// <summary>

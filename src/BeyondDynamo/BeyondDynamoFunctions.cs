@@ -21,6 +21,9 @@ using Newtonsoft.Json;
 
 namespace BeyondDynamo
 {
+    /// <summary>
+    /// This Class Contains all the Functions used in the BeyondDynamoExtension Class
+    /// </summary>
     public class BeyondDynamoFunctions
     {
         /// <summary>
