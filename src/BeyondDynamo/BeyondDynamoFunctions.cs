@@ -44,7 +44,7 @@ namespace BeyondDynamo
         /// <param name="viewModel"></param>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public static bool IsFileOpened(DynamoViewModel viewModel, string filePath)
+        public static bool IsFileOpen(DynamoViewModel viewModel, string filePath)
         {
             if(viewModel.Model.CurrentWorkspace.FileName == filePath)
             {
@@ -54,6 +54,117 @@ namespace BeyondDynamo
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Checks in which Language the Core String of Dynamo Script is
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public static string DynamoCoreLanguage(string filePath)
+        {
+            string coreString = File.ReadAllText(filePath);
+            if (coreString.StartsWith("<"))
+            {
+                return "XML";
+            }
+            else
+            {
+                return "Json";
+            }
+        }
+
+        public static void RemoveTraceData(string filePath)
+        {
+            string version = DynamoCoreLanguage(filePath);
+
+            if (version == "XML")
+            {
+                RemoveSessionTraceData(filePath);
+            }
+            else if( version == "JSON")
+            {
+                RemoveBindings(filePath);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Removes Session Trace Data from a given Filepath. Only for Dynamo 1.3 scripts because of the XML Structure
+        /// </summary>
+        /// <param name="filePath">The Filepath to the Dynamo 1.3 File</param>
+        /// <returns></returns>
+        public static bool RemoveSessionTraceData(string filePath)
+        {
+            bool succes = false;
+            string xmlPath = Path.ChangeExtension(filePath, ".xml");
+            File.Move(filePath, xmlPath);
+            XmlDocument doc = new XmlDocument();
+            doc.Load(xmlPath);
+
+            XmlNode sessionTraceDataNode = null;
+            XmlNode parentNode = null;
+
+            foreach (XmlNode xmlNode in doc.DocumentElement)
+            {
+                if (xmlNode.Name == "SessionTraceData")
+                {
+                    sessionTraceDataNode = xmlNode;
+                    parentNode = sessionTraceDataNode.ParentNode;
+                }
+            }
+            try
+            {
+                parentNode.RemoveChild(sessionTraceDataNode);
+                doc.Save(xmlPath);
+                succes = true;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                string newFilePath = Path.ChangeExtension(xmlPath, ".dyn");
+                File.Move(xmlPath, newFilePath);
+                File.Delete(xmlPath);
+            }
+            return succes;
+        }
+
+        /// <summary>
+        /// Removes the Bindings from a given Filepath. This one is made for Dynamo 2.0
+        /// </summary>
+        /// <param name="DynamoFilepath"></param>
+        /// <returns></returns>
+        public static bool RemoveBindings(string DynamoFilepath)
+        {
+            bool succes = false;
+
+            //Convert the Dynamo File to a Json Text
+            string jsonString = File.ReadAllText(DynamoFilepath);
+
+            //Create a JObject from the Json Text
+            JObject dynamoGraph = JObject.Parse(jsonString);
+
+            //Loop over the Output Nodes and get their names
+            JToken bindings = dynamoGraph.SelectToken("Bindings");
+            JContainer bindingsParent = null;
+            foreach(JToken child in bindings.Children())
+            {
+                bindingsParent = child.Parent;
+            }
+            if (bindingsParent != null)
+            {
+                bindingsParent.RemoveAll();
+                succes = true;
+            }
+            //Write that string 
+            File.WriteAllText(DynamoFilepath, dynamoGraph.ToString());
+            return succes;
         }
 
         /// <summary>
@@ -69,12 +180,13 @@ namespace BeyondDynamo
             {
                 //Get the selected filePath
                 string DynamoFilepath = fileDialog.FileName;
-                string DynamoString = File.ReadAllText(DynamoFilepath);
-                if (DynamoString.StartsWith("<"))
+
+                string version = DynamoCoreLanguage(DynamoFilepath);
+                if (version == "XML")
                 {
                     ImportXMLDynamo(viewModel, DynamoFilepath);
                 }
-                else if (DynamoString.StartsWith("{"))
+                else if (version == "JSON")
                 {
                     ImportJsonDynamo(viewModel, DynamoFilepath);
                 }
@@ -313,12 +425,13 @@ namespace BeyondDynamo
             }
             #endregion
         }
-
+        
         /// <summary>
-        /// Changes the color of a selection of groups by using a Color Picker UI
+        /// Changes the Colors of the Selected Groups in the Workspace Model by using a Color Picker UI
         /// </summary>
-        /// <param name="model"></param>
-        public static void ChangeGroupColor(WorkspaceViewModel model)
+        /// <param name="model">The Current Dynamo Model</param>
+        /// <param name="config">The Beyond Dynamo Settings</param>
+        public static BeyondDynamoConfig ChangeGroupColor(WorkspaceViewModel model, BeyondDynamoConfig config)
         {
             List<AnnotationModel> selectedGroups = new List<AnnotationModel>();
             foreach (AnnotationViewModel groupViewModel in model.Annotations)
@@ -332,6 +445,10 @@ namespace BeyondDynamo
             if (selectedGroups.Count > 0)
             {
                 System.Windows.Forms.ColorDialog colorDialog = new System.Windows.Forms.ColorDialog();
+                if (config.customColors != null)
+                {
+                    colorDialog.CustomColors = config.customColors;
+                }
                 if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     foreach (AnnotationModel group in selectedGroups)
@@ -339,12 +456,15 @@ namespace BeyondDynamo
                         string colorString = System.Drawing.ColorTranslator.ToHtml(colorDialog.Color);
                         group.Background = colorString;
                     }
+                    config.customColors = colorDialog.CustomColors;
                 }
             }
             else
             {
                 System.Windows.MessageBox.Show("No Groups selected");
             }
+
+            return config;
         }
 
         /// <summary>

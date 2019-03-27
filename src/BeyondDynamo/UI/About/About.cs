@@ -10,9 +10,10 @@ namespace BeyondDynamo.UI.About
         public int mouseDownX { get; set; }
         public int mouseDownY { get; set; }
 
-        public About()
+        public About(string version)
         {
             InitializeComponent();
+            versionLabel.Text = "Build: " + version;
         }
         
 
@@ -21,12 +22,10 @@ namespace BeyondDynamo.UI.About
         {
             System.Diagnostics.Process.Start(LinkedIn_Label.Text);
         }
-
         private void LinkedIn_Label_MouseEnter(object sender, EventArgs e)
         {
             LinkedIn_Label.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFC8C8C8");
         }
-
         private void LinkedIn_Label_MouseLeave(object sender, EventArgs e)
         {
             LinkedIn_Label.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");
@@ -68,12 +67,10 @@ namespace BeyondDynamo.UI.About
         {
             System.Diagnostics.Process.Start("www.github.com/JoelvanHerwaarden/BeyondDynamo2.X");
         }
-
         private void GitHub_Label_MouseEnter(object sender, EventArgs e)
         {
             GitHub_Label.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFC8C8C8");
         }
-
         private void GitHub_Label_MouseLeave(object sender, EventArgs e)
         {
             GitHub_Label.ForeColor = System.Drawing.ColorTranslator.FromHtml("#FFFFFF");

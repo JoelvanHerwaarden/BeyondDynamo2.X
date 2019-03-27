@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using Dynamo.Wpf.Extensions;
 using Dynamo.ViewModels;
 using BeyondDynamo.UI.About;
+using BeyondDynamo.UI;
 using System.Xml;
 using Forms = System.Windows.Forms;
 using Newtonsoft.Json;
 using System.IO;
+using System.Net;
 using Newtonsoft.Json.Linq;
+using Dynamo.Models;
 
 namespace BeyondDynamo
 {
@@ -18,9 +21,44 @@ namespace BeyondDynamo
     public class BeyondDynamoExtension : IViewExtension
     {
         /// <summary>
+        /// FilePath for Config File
+        /// </summary>
+        private string configFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dynamo\\Dynamo Core\\BeyondDynamoSettings");
+
+        /// <summary>
+        /// FilePath for Config File
+        /// </summary>
+        private string configFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dynamo\\Dynamo Core\\BeyondDynamoSettings\\beyondDynamo2Config.json");
+
+        /// <summary>
+        /// The Configurations for the Plug-in
+        /// </summary>
+        private BeyondDynamoConfig config;
+
+        /// <summary>
+        /// Request URL for the Releases
+        /// </summary>
+        private const string RequestUri = "https://api.github.com/repos/JoelvanHerwaarden/BeyondDynamo2.X/releases";
+
+        /// <summary>
+        /// This will get the Latest Version
+        /// </summary>
+        private MenuItem LatestVersion;
+
+        /// <summary>
         /// Head Menu Item
         /// </summary>
         private MenuItem BDmenuItem;
+
+        /// <summary>
+        /// Change Node Colors Menuitem
+        /// </summary>
+        private MenuItem ChangeNodeColors;
+
+        /// <summary>
+        /// Remove Trace Data Menuitem
+        /// </summary>
+        private MenuItem BatchRemoveTraceData;
 
         /// <summary>
         /// Change Group Color Menu Item
@@ -51,36 +89,59 @@ namespace BeyondDynamo
         /// Order Player Inputs Menu Item
         /// </summary>
         private MenuItem OrderPlayerInput;
-
+        
         /// <summary>
-        /// Mark input nodes Menu Item
+        /// The Menu Item to remove the binding on the current graph
         /// </summary>
-        private MenuItem MarkInputNodes;
-
-        /// <summary>
-        /// Unmark input nodes Menu Item
-        /// </summary>
-        private MenuItem UnmarkInputNodes;
-
-        /// <summary>
-        /// Mark output nodes Menu Item
-        /// </summary>
-        private MenuItem MarkOutputNodes;
-
-        /// <summary>
-        /// Unmark output nodes Menu Item
-        /// </summary>
-        private MenuItem UnmarkOutputNodes;
+        private MenuItem RemoveBindingsCurrent;
 
         /// <summary>
         /// About Window Menu Item
         /// </summary>
         private MenuItem AboutItem;
-
-        #region Functions which have to be inplemented for the IViewExtension interface
+        
         public void Dispose() { }
 
-        public void Startup(ViewStartupParams p) { }
+        public void Startup(ViewStartupParams p)
+        {
+            try
+            {
+                ServicePointManager.Expect100Continue = true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                       | SecurityProtocolType.Tls11
+                       | SecurityProtocolType.Tls12
+                       | SecurityProtocolType.Ssl3;
+
+                List<double> releasedVersions = new List<double>();
+
+                HttpWebRequest webRequest = WebRequest.CreateHttp(RequestUri);
+                webRequest.ContentType = "application/json";
+                webRequest.UserAgent = "Foo";
+                webRequest.Accept = "application/json";
+                webRequest.Method = "GET";
+
+                WebResponse response = webRequest.GetResponse();
+                Stream dataStream = response.GetResponseStream();
+
+                StreamReader reader = new StreamReader(dataStream);
+                string result = reader.ReadToEnd();
+
+                JToken githubReleases = JToken.Parse(result);
+                foreach (JObject release in githubReleases.Children())
+                {
+                    JToken version = release.GetValue("tag_name");
+                    releasedVersions.Add((double)version);
+                }
+                releasedVersions.Sort();
+                this.latestVersion = releasedVersions[releasedVersions.Count - 1];
+            }
+            catch
+            {
+                this.latestVersion = this.currentVersion;
+            }
+            Directory.CreateDirectory(configFolderPath);
+            config = new BeyondDynamoConfig(this.configFilePath);
+        }
         
         private void CurrentSpaceViewModel_WorkspacePropertyEditRequested(Dynamo.Graph.Workspaces.WorkspaceModel workspace)
         {
@@ -89,6 +150,7 @@ namespace BeyondDynamo
 
         public void Shutdown()
         {
+            this.config.Save();
         }
 
         public string UniqueId
@@ -105,7 +167,22 @@ namespace BeyondDynamo
                 return "Beyond Dynamo 2.0";
             }
         }
-        #endregion
+
+        /// <summary>
+        /// Get the CUrrent Version of Beyond Dynamo for Dynamo 2.X
+        /// </summary>
+        private double currentVersion
+        {
+            get
+            {
+                return 1.0;
+            }
+        }
+
+        /// <summary>
+        /// The Latest version of Beyond Dynamo 2.X on Github
+        /// </summary>
+        private double latestVersion { get; set; }
 
         /// <summary>
         /// Function Which gets Called on Loading the Plug-In
@@ -116,7 +193,62 @@ namespace BeyondDynamo
             BDmenuItem = new MenuItem { Header = "Beyond Dynamo" };
             DynamoViewModel VM = p.DynamoWindow.DataContext as DynamoViewModel;
 
+            LatestVersion = new MenuItem { Header = "New version available! Download now!" };
+            LatestVersion.Click += (sender, args) =>
+            {
+                System.Diagnostics.Process.Start("www.github.com/JoelvanHerwaarden/BeyondDynamo2.X/releases");
+            };
+            if (this.currentVersion < this.latestVersion)
+            {
+                BDmenuItem.Items.Add(LatestVersion);
+            }
+
             #region THIS CAN BE RUN ANYTIME
+            ChangeNodeColors = new MenuItem { Header = "Change Node Color" };
+            ChangeNodeColors.Click += (sender, args) =>
+            {
+                //Make a Viewmodel for the Change Node Color Window
+                var viewModel = new BeyondDynamo.UI.ChangeNodeColorsViewModel(p);
+
+                //Get the current Node Color Template
+                System.Windows.ResourceDictionary dynamoUI = Dynamo.UI.SharedDictionaryManager.DynamoColorsAndBrushesDictionary;
+
+                //Initiate a new Change Node Color Window
+                ChangeNodeColorsWindow colorWindow = new ChangeNodeColorsWindow(dynamoUI)
+                {
+                    // Set the data context for the main grid in the window.
+                    MainGrid = { DataContext = viewModel },
+                    // Set the owner of the window to the Dynamo window.
+                    Owner = p.DynamoWindow,
+                };
+                colorWindow.Left = colorWindow.Owner.Left + 400;
+                colorWindow.Top = colorWindow.Owner.Top + 200;
+
+                //Show the Color window
+                colorWindow.Show();
+            };
+            BDmenuItem.Items.Add(ChangeNodeColors);
+
+            BatchRemoveTraceData = new MenuItem { Header = "Remove Session Trace Data from Dynamo Graphs" };
+            BatchRemoveTraceData.Click += (sender, args) =>
+            {
+                //Make a ViewModel for the Remove Trace Data window
+                var viewModel = new RemoveTraceDataViewModel(p);
+
+                //Initiate a new Remove Trace Data window
+                RemoveTraceDataWindow window = new RemoveTraceDataWindow()
+                {
+                    MainGrid = { DataContext = viewModel },
+                    Owner = p.DynamoWindow,
+                    viewModel = VM
+                };
+                window.Left = window.Owner.Left + 400;
+                window.Top = window.Owner.Top + 200;
+
+                //Show the window
+                window.Show();
+            };
+            BDmenuItem.Items.Add(BatchRemoveTraceData);
 
             OrderPlayerInput = new MenuItem { Header = "Order Input/Output Nodes" };
             OrderPlayerInput.Click += (sender, args) =>
@@ -126,7 +258,7 @@ namespace BeyondDynamo
                 fileDialog.Filter = "Dynamo Files (*.dyn)|*.dyn";
                 if (fileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    if(BeyondDynamoFunctions.IsFileOpened(VM, fileDialog.FileName))
+                    if(BeyondDynamoFunctions.IsFileOpen(VM, fileDialog.FileName))
                     {
                         Forms.MessageBox.Show("Please close the file before using this command", "Order Input/Output Nodes");
                         return;
@@ -158,17 +290,57 @@ namespace BeyondDynamo
 
 
             # region THESE FUNCTION ONLY WORK INSIDE A SCRIPT
+            RemoveBindingsCurrent = new MenuItem { Header = "Remove Bindings from Current Graph" };
+            RemoveBindingsCurrent.Click += (sender, args) =>
+            {
+                //Check if the Graph is saved somewhere
+                Dynamo.Graph.Workspaces.WorkspaceModel workspaceModel = VM.Model.CurrentWorkspace;
+                string filePath = workspaceModel.FileName;
+                bool succes = false;
+                if (filePath == string.Empty)
+                {
+                    Forms.MessageBox.Show("Save the File before running this command");
+                    return;
+                }
+
+                //Warn the user for the Restart
+                Forms.DialogResult warningBox = Forms.MessageBox.Show("The Dynamo Graph will restart without Session Trace Data. \n\n The current graph will be saved", "Dynamo Graph Restart", System.Windows.Forms.MessageBoxButtons.OKCancel);
+                if (warningBox == Forms.DialogResult.Cancel)
+                {
+                    return;
+                }
+
+                //Save the Graph, Close the Graph, Try to Remove Trace Data, Open the Graph again.
+                VM.Model.CurrentWorkspace.Save(filePath, false, VM.Model.EngineController);
+                VM.Model.RemoveWorkspace(VM.Model.CurrentWorkspace);
+                succes = BeyondDynamoFunctions.RemoveBindings(filePath);
+                if (succes)
+                {
+                    Forms.MessageBox.Show("Bindings removed", "Remove Bindings");
+                }
+                else
+                {
+                    Forms.MessageBox.Show("The current graph doesn't contain any Bindings yet", "Remove Bindings");
+                }
+
+                //Open workspace again
+                VM.Model.OpenFileFromPath(filePath, true);
+            };
+            BDmenuItem.Items.Add(RemoveBindingsCurrent);
 
             GroupColor = new MenuItem { Header = "Change Group Color" };
             GroupColor.Click += (sender, args) =>
             {
-                BeyondDynamo.BeyondDynamoFunctions.ChangeGroupColor(VM.CurrentSpaceViewModel);
+                this.config = BeyondDynamo.BeyondDynamoFunctions.ChangeGroupColor(VM.CurrentSpaceViewModel, this.config);
             };
             BDmenuItem.Items.Add(GroupColor);
 
             ScriptImport = new MenuItem { Header = "Import From Script" };
             ScriptImport.Click += (sender, args) =>
             {
+                //Set the Run Type on Manual
+                VM.CurrentSpaceViewModel.RunSettingsViewModel.SelectedRunTypeItem = new Dynamo.Wpf.ViewModels.RunTypeItem(RunType.Manual);
+                //Try to Import the Graph
                 BeyondDynamoFunctions.ImportFromScript(VM);
             };
             BDmenuItem.Items.Add(ScriptImport);
@@ -200,41 +372,14 @@ namespace BeyondDynamo
                 BeyondDynamoFunctions.UnfreezeNodes(VM.Model);
             };
             BDmenuItem.Items.Add(UnfreezeNodes);
-
-            //MarkInputNodes = new MenuItem { Header = "Mark Multiple Nodes as Input " };
-            //MarkInputNodes.Click += (sender, args) =>
-            //{
-            //    BeyondDynamo.BeyondDynamoFunctions.MarkAsInput(VM.Model.CurrentWorkspace);
-            //};
-            //BDmenuItem.Items.Add(MarkInputNodes);
-
-            //UnmarkInputNodes = new MenuItem { Header = "Unmark Multiple Nodes as Input " };
-            //UnmarkInputNodes.Click += (sender, args) =>
-            //{
-            //    BeyondDynamo.BeyondDynamoFunctions.UnMarkAsInput(VM.Model.CurrentWorkspace);
-            //};
-            //BDmenuItem.Items.Add(UnmarkInputNodes);
-
-            //MarkOutputNodes = new MenuItem { Header = "Mark Multiple Nodes as Output" };
-            //MarkOutputNodes.Click += (sender, args) =>
-            //{
-            //    BeyondDynamo.BeyondDynamoFunctions.MarkAsOutput(VM.Model.CurrentWorkspace);
-            //};
-            //BDmenuItem.Items.Add(MarkOutputNodes);
-
-            //UnmarkOutputNodes = new MenuItem { Header = "Unmark Multiple Nodes as Output" };
-            //UnmarkOutputNodes.Click += (sender, args) =>
-            //{
-            //    BeyondDynamo.BeyondDynamoFunctions.UnMarkAsOutput(VM.Model.CurrentWorkspace);
-            //};
-            //BDmenuItem.Items.Add(UnmarkOutputNodes);
+            
             #endregion 
             
             AboutItem = new MenuItem { Header = "About Beyond Dynamo" };
             AboutItem.Click += (sender, args) =>
             {
                 //Show the About dialog
-                About about = new About();
+                About about = new About(this.currentVersion.ToString());
                 about.Show();
             };
             BDmenuItem.Items.Add(new Separator());
@@ -244,6 +389,5 @@ namespace BeyondDynamo
             p.dynamoMenu.Items.Add(BDmenuItem);
             
         }
-
     }
 }
