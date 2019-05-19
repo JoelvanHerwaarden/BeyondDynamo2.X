@@ -21,6 +21,7 @@ namespace BeyondDynamo.UI
     /// </summary>
     public partial class ChangeNodeColorsWindow : Window
     {
+        public BeyondDynamoConfig config { get; set; }
         private System.Windows.ResourceDictionary dynamoNodeSettings { get; set; }
 
         private SolidColorBrush _ITitleText { get; set; }
@@ -47,62 +48,64 @@ namespace BeyondDynamo.UI
         private SolidColorBrush _EBodyBackground { get; set; }
         private SolidColorBrush _EBodyBorder { get; set; }
 
-        
+
         /// <summary>
         /// Public constructor for making the Change node color window
         /// </summary>
         /// <param name="DynamoNodeSettings"></param>
-        public ChangeNodeColorsWindow(System.Windows.ResourceDictionary DynamoNodeSettings)
+        public ChangeNodeColorsWindow(System.Windows.ResourceDictionary DynamoNodeSettings, BeyondDynamoConfig beyondDynamoConfig)
         {
             InitializeComponent();
+
+            this.config = beyondDynamoConfig;
             this.dynamoNodeSettings = DynamoNodeSettings;
-            this._ITitleText                      = (SolidColorBrush)dynamoNodeSettings["headerForegroundInactive"];
-            this._ITitleBackground                = (SolidColorBrush)dynamoNodeSettings["headerBackgroundInactive"];
-            this._ITitleBorder                    = (SolidColorBrush)dynamoNodeSettings["headerBorderInactive"];
-            this._IBodyBackground                 = (SolidColorBrush)dynamoNodeSettings["bodyBackgroundInactive"];
-            this._IBodyBorder                     = (SolidColorBrush)dynamoNodeSettings["outerBorderInactive"];
-                                                  
-            this._ATitleText                      = (SolidColorBrush)dynamoNodeSettings["headerForegroundActive"];
-            this._ATitleBackground                = (SolidColorBrush)dynamoNodeSettings["headerBackgroundActive"];
-            this._ATitleBorder                    = (SolidColorBrush)dynamoNodeSettings["headerBorderActive"];
-            this._ABodyBackground                 = (SolidColorBrush)dynamoNodeSettings["bodyBackgroundActive"];
-            this._ABodyBorder                     = (SolidColorBrush)dynamoNodeSettings["outerBorderActive"];
-                                                  
-            this._WTitleText                      = (SolidColorBrush)dynamoNodeSettings["headerForegroundWarning"];
-            this._WTitleBackground                = (SolidColorBrush)dynamoNodeSettings["headerBackgroundWarning"];
-            this._WTitleBorder                    = (SolidColorBrush)dynamoNodeSettings["headerBorderWarning"];
-            this._WBodyBackground                 = (SolidColorBrush)dynamoNodeSettings["bodyBackgroundWarning"];
-            this._WBodyBorder                     = (SolidColorBrush)dynamoNodeSettings["outerBorderWarning"];
-                                                  
-            this._ETitleText                      = (SolidColorBrush)dynamoNodeSettings["headerForegroundError"];
-            this._ETitleBackground                = (SolidColorBrush)dynamoNodeSettings["headerBackgroundError"];
-            this._ETitleBorder                    = (SolidColorBrush)dynamoNodeSettings["headerBorderError"];
-            this._EBodyBackground                 = (SolidColorBrush)dynamoNodeSettings["bodyBackgroundError"];
-            this._EBodyBorder                     = (SolidColorBrush)dynamoNodeSettings["outerBorderError"];
+            this._ITitleText = (SolidColorBrush)dynamoNodeSettings["headerForegroundInactive"];
+            this._ITitleBackground = (SolidColorBrush)dynamoNodeSettings["headerBackgroundInactive"];
+            this._ITitleBorder = (SolidColorBrush)dynamoNodeSettings["headerBorderInactive"];
+            this._IBodyBackground = (SolidColorBrush)dynamoNodeSettings["bodyBackgroundInactive"];
+            this._IBodyBorder = (SolidColorBrush)dynamoNodeSettings["outerBorderInactive"];
 
-            this.ITitleText.Background            = _ITitleText;
-            this.ITitleBackground.Background      = _ITitleBackground;
-            this.ITitleBorder.Background          = _ITitleBorder;
-            this.IBodyBackground.Background       = _IBodyBackground;
-            this.IBodyBorder.Background           = _IBodyBorder;
+            this._ATitleText = (SolidColorBrush)dynamoNodeSettings["headerForegroundActive"];
+            this._ATitleBackground = (SolidColorBrush)dynamoNodeSettings["headerBackgroundActive"];
+            this._ATitleBorder = (SolidColorBrush)dynamoNodeSettings["headerBorderActive"];
+            this._ABodyBackground = (SolidColorBrush)dynamoNodeSettings["bodyBackgroundActive"];
+            this._ABodyBorder = (SolidColorBrush)dynamoNodeSettings["outerBorderActive"];
 
-            this.ATitleText.Background            = _ATitleText;
-            this.ATitleBackground.Background      = _ATitleBackground;
-            this.ATitleBorder.Background          = _ATitleBorder;
-            this.ABodyBackground.Background       = _ABodyBackground;
-            this.ABodyBorder.Background           = _ABodyBorder;
+            this._WTitleText = (SolidColorBrush)dynamoNodeSettings["headerForegroundWarning"];
+            this._WTitleBackground = (SolidColorBrush)dynamoNodeSettings["headerBackgroundWarning"];
+            this._WTitleBorder = (SolidColorBrush)dynamoNodeSettings["headerBorderWarning"];
+            this._WBodyBackground = (SolidColorBrush)dynamoNodeSettings["bodyBackgroundWarning"];
+            this._WBodyBorder = (SolidColorBrush)dynamoNodeSettings["outerBorderWarning"];
 
-            this.WTitleText.Background            = _WTitleText;
-            this.WTitleBackground.Background      = _WTitleBackground;
-            this.WTitleBorder.Background          = _WTitleBorder;
-            this.WBodyBackground.Background       = _WBodyBackground;
-            this.WBodyBorder.Background           = _WBodyBorder;
+            this._ETitleText = (SolidColorBrush)dynamoNodeSettings["headerForegroundError"];
+            this._ETitleBackground = (SolidColorBrush)dynamoNodeSettings["headerBackgroundError"];
+            this._ETitleBorder = (SolidColorBrush)dynamoNodeSettings["headerBorderError"];
+            this._EBodyBackground = (SolidColorBrush)dynamoNodeSettings["bodyBackgroundError"];
+            this._EBodyBorder = (SolidColorBrush)dynamoNodeSettings["outerBorderError"];
 
-            this.ETitleText.Background            = _ETitleText;
-            this.ETitleBackground.Background      = _ETitleBackground;
-            this.ETitleBorder.Background          = _ETitleBorder;
-            this.EBodyBackground.Background       = _EBodyBackground;
-            this.EBodyBorder.Background           = _EBodyBorder;
+            this.ITitleText.Background = _ITitleText;
+            this.ITitleBackground.Background = _ITitleBackground;
+            this.ITitleBorder.Background = _ITitleBorder;
+            this.IBodyBackground.Background = _IBodyBackground;
+            this.IBodyBorder.Background = _IBodyBorder;
+
+            this.ATitleText.Background = _ATitleText;
+            this.ATitleBackground.Background = _ATitleBackground;
+            this.ATitleBorder.Background = _ATitleBorder;
+            this.ABodyBackground.Background = _ABodyBackground;
+            this.ABodyBorder.Background = _ABodyBorder;
+
+            this.WTitleText.Background = _WTitleText;
+            this.WTitleBackground.Background = _WTitleBackground;
+            this.WTitleBorder.Background = _WTitleBorder;
+            this.WBodyBackground.Background = _WBodyBackground;
+            this.WBodyBorder.Background = _WBodyBorder;
+
+            this.ETitleText.Background = _ETitleText;
+            this.ETitleBackground.Background = _ETitleBackground;
+            this.ETitleBorder.Background = _ETitleBorder;
+            this.EBodyBackground.Background = _EBodyBackground;
+            this.EBodyBorder.Background = _EBodyBorder;
         }
 
 
@@ -114,7 +117,14 @@ namespace BeyondDynamo.UI
         private void changeColorButton_Click(object sender, RoutedEventArgs e)
         {
             Button changeColorButton = (Button)sender;
+
             System.Windows.Forms.ColorDialog colorDialog = new System.Windows.Forms.ColorDialog();
+
+            if (config.customColors != null)
+            {
+                colorDialog.CustomColors = config.customColors;
+            }
+
             if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 System.Drawing.Color color = colorDialog.Color;
@@ -126,6 +136,7 @@ namespace BeyondDynamo.UI
                     B = color.B
                 };
                 changeColorButton.Background = new SolidColorBrush(newColor);
+                config.customColors = colorDialog.CustomColors;
             }
         }
 

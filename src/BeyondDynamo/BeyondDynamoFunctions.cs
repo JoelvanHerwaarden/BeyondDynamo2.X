@@ -18,6 +18,7 @@ using Dynamo.Models;
 using Newtonsoft.Json.Linq;
 using Forms = System.Windows.Forms;
 using Newtonsoft.Json;
+using Dynamo.UI.Commands;
 
 namespace BeyondDynamo
 {
@@ -68,9 +69,13 @@ namespace BeyondDynamo
             {
                 return "XML";
             }
-            else
+            else if (coreString.StartsWith("{"))
             {
                 return "Json";
+            }
+            else
+            {
+                return "Unsupported";
             }
         }
 
@@ -186,14 +191,19 @@ namespace BeyondDynamo
                 {
                     ImportXMLDynamo(viewModel, DynamoFilepath);
                 }
-                else if (version == "JSON")
+                else if (version == "Json")
                 {
                     ImportJsonDynamo(viewModel, DynamoFilepath);
                 }
                 else
                 {
+                    Forms.MessageBox.Show("The Selected File is not Supported");
                     return;
                 }
+
+                //Zoom to the imported Script
+                DelegateCommand fitView = viewModel.FitViewCommand;
+                fitView.Execute(viewModel.CurrentSpaceViewModel);
             }
         }
 
@@ -212,6 +222,7 @@ namespace BeyondDynamo
             List<dynamic> selectionList = new List<dynamic>();
 
             //Load a XML Document from the Dynamo File\
+            
             XmlDocument doc = new XmlDocument();
             doc.Load(DynamoFilePath);
 
@@ -338,15 +349,31 @@ namespace BeyondDynamo
             Dynamo.Graph.SaveContext saveContext = Dynamo.Graph.SaveContext.None;
 
             //Loop over all the NodeModels from the importedModel
+            List<string> errorNodeNames = new List<string>
+            {
+                "The following nodes are not supported and will not be imported:\n\n",
+            };
             foreach (NodeModel node in importedModel.Nodes)
             {
                 guidList.Add(node.GUID.ToString());
                 XmlElement nodeAsXML = node.Serialize(doc, saveContext);
                 NodeViewModel nodeView = new NodeViewModel(viewModel.CurrentSpaceViewModel, node);
-
-                model.CreateModel(nodeAsXML);
+                try
+                {
+                    model.CreateModel(nodeAsXML);
+                }
+                catch
+                {
+                    errorNodeNames.Add(node.Name);
+                    errorNodeNames.Add("\n");
+                }
             }
-
+            if (errorNodeNames.Count > 1)
+            {
+                string message = String.Concat(errorNodeNames);
+                Forms.MessageBox.Show(text:message, caption:"Import Warning", icon:MessageBoxIcon.Warning, buttons:MessageBoxButtons.OK);
+            }
+            
             //Loop over all ConnectorModels from the importedModel
             foreach (ConnectorModel connector in importedModel.Connectors)
             {

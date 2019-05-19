@@ -1,0 +1,5 @@
+MAKE SURE TO RIGHT CLICK THE FILES AND GO TO PROPERTIES. THEN UNBLOCK THE FILE BEFORE DRAGGING THEM INTO THE FOLDERS
+
+Copy BeyondDynamo.dll to C:\Program Files\Dynamo\Dynamo Core\2
+
+Copy BeyondDynamo_ViewExtensionDefinition.xml to C:\Program Files\Dynamo\Dynamo Core\2\viewExtensions

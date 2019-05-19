@@ -12,6 +12,7 @@ using System.IO;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using Dynamo.Models;
+using Dynamo.Graph.Workspaces;
 
 namespace BeyondDynamo
 {
@@ -23,12 +24,12 @@ namespace BeyondDynamo
         /// <summary>
         /// FilePath for Config File
         /// </summary>
-        private string configFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dynamo\\Dynamo Core\\BeyondDynamoSettings");
+        private string configFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dynamo\\BeyondDynamoSettings");
 
         /// <summary>
         /// FilePath for Config File
         /// </summary>
-        private string configFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dynamo\\Dynamo Core\\BeyondDynamoSettings\\beyondDynamo2Config.json");
+        private string configFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dynamo\\BeyondDynamoSettings\\beyondDynamo2Config.json");
 
         /// <summary>
         /// The Configurations for the Plug-in
@@ -135,8 +136,10 @@ namespace BeyondDynamo
                 releasedVersions.Sort();
                 this.latestVersion = releasedVersions[releasedVersions.Count - 1];
             }
-            catch
+            catch(Exception exception)
             {
+                string message = "Could not get a response from GitHub for version control" + "\n\n\n" + exception.ToString();
+                Forms.MessageBox.Show(text: message, caption: "Beyond Dynamo 2.X", icon: Forms.MessageBoxIcon.Warning, buttons: Forms.MessageBoxButtons.OK);
                 this.latestVersion = this.currentVersion;
             }
             Directory.CreateDirectory(configFolderPath);
@@ -214,7 +217,7 @@ namespace BeyondDynamo
                 System.Windows.ResourceDictionary dynamoUI = Dynamo.UI.SharedDictionaryManager.DynamoColorsAndBrushesDictionary;
 
                 //Initiate a new Change Node Color Window
-                ChangeNodeColorsWindow colorWindow = new ChangeNodeColorsWindow(dynamoUI)
+                ChangeNodeColorsWindow colorWindow = new ChangeNodeColorsWindow(dynamoUI, config)
                 {
                     // Set the data context for the main grid in the window.
                     MainGrid = { DataContext = viewModel },

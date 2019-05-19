@@ -24,8 +24,11 @@ namespace BeyondDynamo
             if (File.Exists(ConfigFilePath))
             {
                 string content = File.ReadAllText(ConfigFilePath);
-                JToken config = JToken.Parse(content);
-                customColors = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(config["customColors"].ToString());
+                if(content != String.Empty)
+                {
+                    JToken config = JToken.Parse(content);
+                    customColors = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(config["customColors"].ToString());
+                }
             }
             else
             {
