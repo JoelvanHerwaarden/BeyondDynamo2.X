@@ -19,7 +19,6 @@ using Newtonsoft.Json.Linq;
 using Forms = System.Windows.Forms;
 using Newtonsoft.Json;
 using Dynamo.UI.Commands;
-
 namespace BeyondDynamo
 {
     /// <summary>
@@ -155,10 +154,10 @@ namespace BeyondDynamo
             //Create a JObject from the Json Text
             JObject dynamoGraph = JObject.Parse(jsonString);
 
-            //Loop over the Output Nodes and get their names
+
             JToken bindings = dynamoGraph.SelectToken("Bindings");
             JContainer bindingsParent = null;
-            foreach(JToken child in bindings.Children())
+            foreach (JToken child in bindings.Children())
             {
                 bindingsParent = child.Parent;
             }
@@ -169,6 +168,7 @@ namespace BeyondDynamo
             }
             //Write that string 
             File.WriteAllText(DynamoFilepath, dynamoGraph.ToString());
+
             return succes;
         }
 

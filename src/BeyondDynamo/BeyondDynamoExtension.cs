@@ -178,7 +178,7 @@ namespace BeyondDynamo
         {
             get
             {
-                return 1.0;
+                return 1.1;
             }
         }
 
@@ -293,11 +293,12 @@ namespace BeyondDynamo
 
 
             # region THESE FUNCTION ONLY WORK INSIDE A SCRIPT
-            RemoveBindingsCurrent = new MenuItem { Header = "Remove Bindings from Current Graph" };
+            RemoveBindingsCurrent = new MenuItem { Header = "BETA: Remove Bindings from Current Graph" };
             RemoveBindingsCurrent.Click += (sender, args) =>
             {
                 //Check if the Graph is saved somewhere
-                Dynamo.Graph.Workspaces.WorkspaceModel workspaceModel = VM.Model.CurrentWorkspace;
+                WorkspaceViewModel workspaceViewModel = VM.CurrentSpaceViewModel;
+                WorkspaceModel workspaceModel = workspaceViewModel.Model;
                 string filePath = workspaceModel.FileName;
                 bool succes = false;
                 if (filePath == string.Empty)
@@ -313,8 +314,9 @@ namespace BeyondDynamo
                     return;
                 }
 
+
                 //Save the Graph, Close the Graph, Try to Remove Trace Data, Open the Graph again.
-                VM.Model.CurrentWorkspace.Save(filePath, false, VM.Model.EngineController);
+                workspaceViewModel.DynamoViewModel.SaveAs(filePath);
                 VM.Model.RemoveWorkspace(VM.Model.CurrentWorkspace);
                 succes = BeyondDynamoFunctions.RemoveBindings(filePath);
                 if (succes)
