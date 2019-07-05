@@ -1,9 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Navigation;
-using Dynamo.Extensions;
-using Dynamo.Graph.Nodes;
-using Dynamo.Wpf.Extensions;
-using System.Diagnostics;
+﻿using Dynamo.Graph.Nodes;
 using System.Windows.Forms;
 using System.IO;
 using System.Xml;
@@ -17,7 +12,7 @@ using System;
 using Dynamo.Models;
 using Newtonsoft.Json.Linq;
 using Forms = System.Windows.Forms;
-using Newtonsoft.Json;
+using Controls = System.Windows.Controls;
 using Dynamo.UI.Commands;
 namespace BeyondDynamo
 {
@@ -36,6 +31,32 @@ namespace BeyondDynamo
             {
                 model.AddToSelection(item);
             }
+        }
+
+        /// <summary>
+        /// Returns the Nodes and Their names as a List
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public static List<dynamic> GetNodes(WorkspaceModel model)
+        {
+            List<NodeModel> nodes = new List<NodeModel>();
+            List<string> nodeNames = new List<string>();
+            List<Guid> nodeGUIDs = new List<Guid>();
+            foreach (NodeModel node in model.Nodes)
+            {
+                nodes.Add(node);
+                nodeNames.Add(node.Name);
+                nodeGUIDs.Add(node.GUID);
+            }
+            List<dynamic> output = new List<dynamic>
+            {
+                nodes,
+                nodeNames,
+                nodeGUIDs
+            };
+
+            return output;
         }
 
         /// <summary>
@@ -197,7 +218,7 @@ namespace BeyondDynamo
                 }
                 else
                 {
-                    Forms.MessageBox.Show("The Selected File is not Supported");
+                    Forms.MessageBox.Show("The Selected File is not Supported", "Beyond Dynamo");
                     return;
                 }
 
@@ -488,7 +509,7 @@ namespace BeyondDynamo
             }
             else
             {
-                System.Windows.MessageBox.Show("No Groups selected");
+                System.Windows.MessageBox.Show("No Groups selected", "Beyond Dynamo");
             }
 
             return config;
@@ -556,7 +577,7 @@ namespace BeyondDynamo
 
             if (selectedNotes.Count == 0)
             {
-                System.Windows.MessageBox.Show("No Notes Selected");
+                System.Windows.MessageBox.Show("No Notes Selected", "Beyond Dynamo");
                 KeepSelection(model);
                 return;
             }
@@ -566,12 +587,8 @@ namespace BeyondDynamo
             {
                 if (note.IsSelected)
                 {
-                    TextBoxWindow textBox = new TextBoxWindow(note.Text);
+                    TextBoxWindow textBox = new TextBoxWindow(note);
                     textBox.Show();
-                    textBox.Closed += (send, arg) =>
-                    {
-                        note.Text = textBox.text;
-                    };
                 }
             }
             KeepSelection(model);
@@ -708,6 +725,109 @@ namespace BeyondDynamo
                 node.Description = "This is Description";
                 node.ToolTipText = "This is the ToolTip";
                 
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all player scripts from a Given folder and creates menuItems for them.
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="model"></param>
+        /// <param name="filePath"></param>
+        /// <param name="extraItems"></param>
+        public static void RetrievePlayerFiles(Controls.MenuItem owner, DynamoViewModel viewModel, string filePath, List<Controls.MenuItem> extraItems)
+        {
+            DynamoModel model = viewModel.Model;
+            // Check if the Filepath is not Empty
+            if (filePath != "")
+            {
+                // Get all the Files from the given Directory Path, which comes out of the Configuration file
+                string[] filePaths = Directory.GetFiles(filePath);
+                foreach (string path in filePaths)
+                {
+                    //Check if the File is a Dynamo File
+                    if (Path.GetExtension(path) == ".dyn")
+                    {
+                        // Get the File Name
+                        string fileName = Path.GetFileNameWithoutExtension(path);
+
+                        //Make a Menu Item for each File
+                        Controls.MenuItem item = new Controls.MenuItem { Header = fileName };
+                        item.ToolTip = new Controls.ToolTip { Content = path };
+
+                        //Create a clicking Event
+                        item.Click += (sender, args) =>
+                        {
+                            //Check if the Current Model need Saving
+                            if (model.CurrentWorkspace.HasUnsavedChanges)
+                            {
+                                //Show Prompt Window for Saving
+                                Forms.DialogResult result = Forms.MessageBox.Show("Do you want to Save the current Workspace?", "Save", Forms.MessageBoxButtons.YesNoCancel);
+                                if (result == Forms.DialogResult.Yes)
+                                {
+                                    //Check if the model already has a Filepath
+                                    if (model.CurrentWorkspace.FileName == "")
+                                    {
+                                        //If there is no Filepath, show a Save as dialog
+                                        Forms.SaveFileDialog dialog = new Forms.SaveFileDialog();
+                                        dialog.AddExtension = true;
+                                        dialog.DefaultExt = "dyn";
+                                        dialog.Filter = "Dynamo Files (*.dyn)|*.dyn";
+                                        if (Forms.DialogResult.OK == dialog.ShowDialog())
+                                        {
+                                            // Save the File
+                                            model.CurrentWorkspace.Save(dialog.FileName);
+
+                                            //Open the new File
+                                            model.OpenFileFromPath(path, true);
+                                            model.CurrentWorkspace.HasUnsavedChanges = true;
+                                        }
+                                    }
+                                    //If there is a Filepath, Save the File
+                                    else
+                                    {
+                                        //Save the File
+                                        model.CurrentWorkspace.Save(model.CurrentWorkspace.FileName);
+
+                                        //Open the New File
+                                        model.OpenFileFromPath(path, true);
+                                        model.CurrentWorkspace.HasUnsavedChanges = true;
+                                    }
+                                }
+                                // If the user doesn't want to save the current file, then open the Player file
+                                else if (result == Forms.DialogResult.No)
+                                {
+                                    model.OpenFileFromPath(path, true);
+                                    model.CurrentWorkspace.HasUnsavedChanges = true;
+                                }
+                            }
+
+                            //If there are No unsaved changes, Open the File
+                            else
+                            {
+                                model.OpenFileFromPath(path, true);
+                                model.CurrentWorkspace.HasUnsavedChanges = true;
+                            }
+
+
+                        };
+
+                        //Add the Item to the Player scripts MenuItem
+                        owner.Items.Add(item);
+                    }
+                }
+
+                // Add the Extra Menu items
+                owner.Items.Add(new Controls.Separator());
+                foreach (Controls.MenuItem item in extraItems)
+                {
+                    owner.Items.Add(item);
+                }
+            }
+            // If the Filepath is empty, Only add the "Set Player Path" Menu Item 
+            else
+            {
+                owner.Items.Add(extraItems[0]);
             }
         }
     }

@@ -5,14 +5,13 @@ using Dynamo.Wpf.Extensions;
 using Dynamo.ViewModels;
 using BeyondDynamo.UI.About;
 using BeyondDynamo.UI;
-using System.Xml;
 using Forms = System.Windows.Forms;
-using Newtonsoft.Json;
 using System.IO;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using Dynamo.Models;
 using Dynamo.Graph.Workspaces;
+using Dynamo.Graph.Nodes;
 
 namespace BeyondDynamo
 {
@@ -72,6 +71,11 @@ namespace BeyondDynamo
         private MenuItem ScriptImport;
 
         /// <summary>
+        /// Search Nodes Menu Item
+        /// </summary>
+        private MenuItem NodeCollector;
+
+        /// <summary>
         /// Edit Notes Menu Item
         /// </summary>
         private MenuItem EditNotes;
@@ -90,6 +94,11 @@ namespace BeyondDynamo
         /// Order Player Inputs Menu Item
         /// </summary>
         private MenuItem OrderPlayerInput;
+
+        /// <summary>
+        /// Player script menu item
+        /// </summary>
+        private MenuItem PlayerScripts;
         
         /// <summary>
         /// The Menu Item to remove the binding on the current graph
@@ -205,6 +214,7 @@ namespace BeyondDynamo
             {
                 BDmenuItem.Items.Add(LatestVersion);
             }
+            
 
             #region THIS CAN BE RUN ANYTIME
             ChangeNodeColors = new MenuItem { Header = "Change Node Color" };
@@ -230,6 +240,10 @@ namespace BeyondDynamo
                 //Show the Color window
                 colorWindow.Show();
             };
+            ChangeNodeColors.ToolTip = new ToolTip()
+            {
+                Content = "This lets you change the Node Color Settings in your Dynamo nodes in In-Active, Active, Warning and Error state"
+            };
             BDmenuItem.Items.Add(ChangeNodeColors);
 
             BatchRemoveTraceData = new MenuItem { Header = "Remove Session Trace Data from Dynamo Graphs" };
@@ -250,6 +264,13 @@ namespace BeyondDynamo
 
                 //Show the window
                 window.Show();
+            };
+            BatchRemoveTraceData.ToolTip = new ToolTip()
+            {
+                Content = "Removes the Session Trace Data / Bindings from muliple Dynamo scripts in a given Directory" +
+                "\n" +
+                "\nSession Trace Data / Bindings is the trace data binding with the current Revit model and elements." +
+                "\nIt can slow your scripts down if you run them because it first tries the regain the last session in which it was used."
             };
             BDmenuItem.Items.Add(BatchRemoveTraceData);
 
@@ -285,7 +306,49 @@ namespace BeyondDynamo
                     }
                 }
             };
+            OrderPlayerInput.ToolTip = new ToolTip()
+            {
+                Content = "Select a Dynamo file and it will let you sort the Nodes marked as 'Input'' & Output'" +
+                "\n" +
+                "\n Only Watch nodes which are marked as Output are displayed in the Dynamo Player. " +
+                "\nOther nodes will show up in Refinery"
+            };
             BDmenuItem.Items.Add(OrderPlayerInput);
+
+            PlayerScripts = new MenuItem { Header = "Player Graphs" };
+            MenuItem openPlayerPath = new MenuItem { Header = "Open Player Path" };
+            openPlayerPath.Click += (sender, args) =>
+            {
+                System.Diagnostics.Process.Start(this.config.playerPath);
+            };
+            MenuItem setPlayerPath = new MenuItem { Header = "Set Player Path" };
+            List<MenuItem> extraMenuItems = new List<MenuItem> { setPlayerPath, openPlayerPath };
+            setPlayerPath.Click += (sender, args) =>
+            {
+                Forms.FolderBrowserDialog browserDialog = new Forms.FolderBrowserDialog();
+                if (this.config.playerPath != null)
+                {
+                    browserDialog.SelectedPath = this.config.playerPath;
+                }
+                if (browserDialog.ShowDialog() == Forms.DialogResult.OK)
+                {
+                    if (browserDialog.SelectedPath != null)
+                    {
+                        PlayerScripts.Items.Clear();
+                        BeyondDynamoFunctions.RetrievePlayerFiles(PlayerScripts, VM, browserDialog.SelectedPath, extraMenuItems);
+                        this.config.playerPath = browserDialog.SelectedPath;
+                    }
+                }
+            };
+            if (this.config.playerPath != null)
+            {
+                BeyondDynamoFunctions.RetrievePlayerFiles(PlayerScripts, VM, this.config.playerPath, extraMenuItems);
+            }
+            else
+            {
+                PlayerScripts.Items.Add(setPlayerPath);
+            }
+            BDmenuItem.Items.Add(PlayerScripts);
 
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(new Separator());
@@ -293,7 +356,7 @@ namespace BeyondDynamo
 
 
             # region THESE FUNCTION ONLY WORK INSIDE A SCRIPT
-            RemoveBindingsCurrent = new MenuItem { Header = "BETA: Remove Bindings from Current Graph" };
+            RemoveBindingsCurrent = new MenuItem { Header = "Remove Bindings from Current Graph" };
             RemoveBindingsCurrent.Click += (sender, args) =>
             {
                 //Check if the Graph is saved somewhere
@@ -331,6 +394,10 @@ namespace BeyondDynamo
                 //Open workspace again
                 VM.Model.OpenFileFromPath(filePath, true);
             };
+            RemoveBindingsCurrent.ToolTip = new ToolTip()
+            {
+                Content = "Removes the Bindings to the last Session in Revit. \nIt will keep the Elements placed in the last Run"
+            };
             BDmenuItem.Items.Add(RemoveBindingsCurrent);
 
             GroupColor = new MenuItem { Header = "Change Group Color" };
@@ -338,9 +405,13 @@ namespace BeyondDynamo
             {
                 this.config = BeyondDynamo.BeyondDynamoFunctions.ChangeGroupColor(VM.CurrentSpaceViewModel, this.config);
             };
+            GroupColor.ToolTip = new ToolTip()
+            {
+                Content = "Gives a Color Picker Dialog in which you can select a color to use for the selected groups"
+            };
             BDmenuItem.Items.Add(GroupColor);
 
-            ScriptImport = new MenuItem { Header = "Import From Script" };
+            ScriptImport = new MenuItem { Header = "Import From Graph" };
             ScriptImport.Click += (sender, args) =>
             {
                 //Set the Run Type on Manual
@@ -348,7 +419,47 @@ namespace BeyondDynamo
                 //Try to Import the Graph
                 BeyondDynamoFunctions.ImportFromScript(VM);
             };
+            ScriptImport.ToolTip = new ToolTip()
+            {
+                Content = "This lets you select a Dynamo File and it will import the contents of that script inside the current workspace"
+            };
             BDmenuItem.Items.Add(ScriptImport);
+
+            NodeCollector = new MenuItem { Header = "Search Workspace" };
+            NodeCollector.Click += (sender, args) =>
+            {
+                List<string> nodeNames = new List<string>();
+                // Make a Viewmodel for the Change Node Color Window
+                foreach (NodeModel node in VM.Model.CurrentWorkspace.Nodes)
+                {
+                    nodeNames.Add(node.Name);
+                }
+
+                //Create a view model for the UI
+                var viewModel = new BeyondDynamo.UI.NodeCollectorViewModel(p);
+
+                //Get all the Nodes in The Workspace with Names
+                List<dynamic> InputNodes = BeyondDynamoFunctions.GetNodes(VM.Model.CurrentWorkspace);
+
+                //Create a new node collector UI
+                NodeCollectorWindow nodeCollectorWindow = new NodeCollectorWindow(InputNodes, VM)
+                {
+                    // Set the data context for the main grid in the window.
+                    MainGrid = { DataContext = viewModel },
+                    // Set the owner of the window to the Dynamo window.
+                    Owner = p.DynamoWindow,
+                };
+                nodeCollectorWindow.Left = nodeCollectorWindow.Owner.Left + 400;
+                nodeCollectorWindow.Top = nodeCollectorWindow.Owner.Top + 200;
+
+                //Show the Color window
+                nodeCollectorWindow.Show();
+            };
+            NodeCollector.ToolTip = new ToolTip()
+            {
+                Content = "This will let you search for Nodes in the Current workspace"
+            };
+            BDmenuItem.Items.Add(NodeCollector);
 
             EditNotes = new MenuItem { Header = "Edit Note Text" };
             EditNotes.Click += (sender, args) =>
@@ -356,11 +467,15 @@ namespace BeyondDynamo
                 //Check if we are in an active graph
                 if (VM.Workspaces.Count < 1)
                 {
-                    Forms.MessageBox.Show("This command can only run in an active graph.\nPlease open a Dynamo Graph to use this function.");
+                    Forms.MessageBox.Show("This command can only run in an active graph.\nPlease open a Dynamo Graph to use this function.", "Beyond Dynamo");
                     return;
                 }
 
                 BeyondDynamoFunctions.CallTextEditor(VM.Model);
+            };
+            EditNotes.ToolTip = new ToolTip()
+            {
+                Content = "A Resizable window to edit selected Text Notes"
             };
             BDmenuItem.Items.Add(EditNotes);
 
@@ -369,12 +484,20 @@ namespace BeyondDynamo
             {
                 BeyondDynamoFunctions.FreezeNodes(VM.Model);
             };
+            FreezeNodes.ToolTip = new ToolTip()
+            {
+                Content = "Freezes all selected nodes and groups"
+            };
             BDmenuItem.Items.Add(FreezeNodes);
 
             UnfreezeNodes = new MenuItem { Header = "Unfreeze Multiple Nodes" };
             UnfreezeNodes.Click += (sender, args) =>
             {
                 BeyondDynamoFunctions.UnfreezeNodes(VM.Model);
+            };
+            UnfreezeNodes.ToolTip = new ToolTip()
+            {
+                Content = "Unfreezes all selected nodes and groups"
             };
             BDmenuItem.Items.Add(UnfreezeNodes);
             
@@ -387,6 +510,10 @@ namespace BeyondDynamo
                 About about = new About(this.currentVersion.ToString());
                 about.Show();
             };
+            AboutItem.ToolTip = new ToolTip()
+            {
+                Content = "Shows all the information about Beyond Dynamo"
+            };
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(AboutItem);
@@ -394,5 +521,6 @@ namespace BeyondDynamo
             p.dynamoMenu.Items.Add(BDmenuItem);
             
         }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dynamo.Graph.Notes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,8 @@ namespace BeyondDynamo
     /// </summary>
     public partial class TextBoxWindow : Window
     {
+        private NoteModel note { get; set; }
+
         /// <summary>
         /// The Typed Text in the Test Editor Window
         /// </summary>
@@ -29,9 +32,10 @@ namespace BeyondDynamo
         /// The Text Editor Window
         /// </summary>
         /// <param name="startText"></param>
-        public TextBoxWindow(string startText)
+        public TextBoxWindow(NoteModel Note)
         {
-            text = startText;
+            this.note = Note;
+            text = Note.Text;
             InitializeComponent();
             textBox.Text = text;
         }
@@ -43,8 +47,12 @@ namespace BeyondDynamo
         /// <param name="e"></param>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            text = textBox.Text;
             this.Close();
+        }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            note.Text = this.textBox.Text;
         }
     }
 }

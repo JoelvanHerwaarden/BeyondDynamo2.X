@@ -4,9 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d" Height="250" Width="400" Title="Change Text..." Foreground="Black">
-	<Grid Margin="0,0,0,0" Background="#FF2A2A2A">
-		<TextBox x:Name="textBox" Margin="10,10,10.4,46.6" TextWrapping="Wrap" Text="Text"  Background="#FFBCBCC2" 
-				 FontSize="16" AcceptsReturn="True" AcceptsTab="True" AutoWordSelection="True" />
+	<Grid Margin="0,0,0,0" Background="#FF8C8C8C">
+		<TextBox x:Name="textBox" Margin="10,10,10.4,46.6" TextWrapping="Wrap" Text="Text"  Background="White" 
+				 FontSize="16" AcceptsReturn="True" AcceptsTab="True" AutoWordSelection="True" BorderBrush="Black" TextChanged="TextBox_TextChanged" />
 		<Button Content="Accept" Margin="0,0,10.4,9.6" HorizontalAlignment="Right" Width="141" Height="32" 
 				VerticalAlignment="Bottom" Background="White" Click="Button_Click"/>
 	</Grid>

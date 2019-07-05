@@ -170,6 +170,10 @@
     </Compile>
     <Compile Include="UI\ChangeNodeColor\ChangeNodeColorsViewModel.cs" />
     <Compile Include="UI\ChangeNodeColor\ChangeNodeColorsWindow.xaml.cs" />
+    <Compile Include="UI\NodesCollector\NodeCollectorViewModel.cs" />
+    <Compile Include="UI\NodesCollector\NodeCollectorWindow.xaml.cs">
+      <DependentUpon>NodeCollectorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\OrderPlayerInput\OrderPlayerInputWindow.xaml.cs">
       <DependentUpon>OrderPlayerInputWindow.xaml</DependentUpon>
     </Compile>
@@ -181,7 +185,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="UI\TextBox\app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +197,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="UI\ChangeNodeColor\ChangeNodeColorsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\NodesCollector\NodeCollectorWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
