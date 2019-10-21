@@ -146,9 +146,9 @@ namespace BeyondDynamo
                 this.latestVersion = releasedVersions[releasedVersions.Count - 1];
             }
             catch(Exception exception)
-            {
-                string message = "Could not get a response from GitHub for version control" + "\n\n\n" + exception.ToString();
-                Forms.MessageBox.Show(text: message, caption: "Beyond Dynamo 2.X", icon: Forms.MessageBoxIcon.Warning, buttons: Forms.MessageBoxButtons.OK);
+            { 
+                string message = "Could not get a response from GitHub for version control" + "\n\n\n" + "Try again later";
+                Forms.MessageBox.Show(message, "Beyond Dynamo 2.X", Forms.MessageBoxButtons.OK, Forms.MessageBoxIcon.Warning);
                 this.latestVersion = this.currentVersion;
             }
             Directory.CreateDirectory(configFolderPath);
@@ -187,7 +187,7 @@ namespace BeyondDynamo
         {
             get
             {
-                return 1.1;
+                return 1.2;
             }
         }
 
@@ -376,8 +376,7 @@ namespace BeyondDynamo
                 {
                     return;
                 }
-
-
+                
                 //Save the Graph, Close the Graph, Try to Remove Trace Data, Open the Graph again.
                 workspaceViewModel.DynamoViewModel.SaveAs(filePath);
                 VM.Model.RemoveWorkspace(VM.Model.CurrentWorkspace);
@@ -503,7 +502,7 @@ namespace BeyondDynamo
             
             #endregion 
             
-            AboutItem = new MenuItem { Header = "About Beyond Dynamo" };
+            AboutItem = new MenuItem { Header = "About Beyond Dynamo"};
             AboutItem.Click += (sender, args) =>
             {
                 //Show the About dialog

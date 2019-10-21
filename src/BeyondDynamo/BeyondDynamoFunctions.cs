@@ -99,6 +99,10 @@ namespace BeyondDynamo
             }
         }
 
+        /// <summary>
+        /// This function calls Both RemoveSessionTraceData and RemoveBindings, based on the Graph Version (1.3, 2.0)
+        /// </summary>
+        /// <param name="filePath"></param>
         public static void RemoveTraceData(string filePath)
         {
             string version = DynamoCoreLanguage(filePath);
@@ -601,10 +605,10 @@ namespace BeyondDynamo
         public static void SortInputOutputNodesJson(string DynamoFilepath)
         {
             //Create a new Empty List for the Input Node Names
-            List<string> inputNodeNames = new List<string>();
+            Dictionary<string, string> inputNodes = new Dictionary<string, string>();
 
-            //Create a new Empty List for the Input Node Names
-            List<string> outputNodeNames = new List<string>();
+            //Create a new Empty List for the Output Node Names
+            Dictionary<string, string> outputNodes = new Dictionary<string, string>();
 
             //Convert the Dynamo File to a Json Text
             string jsonString = File.ReadAllText(DynamoFilepath);
@@ -612,22 +616,25 @@ namespace BeyondDynamo
             //Create a JObject from the Json Text
             JObject dynamoGraph = JObject.Parse(jsonString);
 
-            //Loop over the Input Nodes and get their names
-            foreach (JToken child in dynamoGraph.SelectToken("Inputs").Children())
+            foreach (JToken child in dynamoGraph.SelectToken("View").SelectToken("NodeViews").Children())
             {
-                string name = child.Value<string>("Name");
-                inputNodeNames.Add(name);
-            }
+                if (child.Value<bool>("IsSetAsInput"))
+                {
+                    string value = child.Value<string>("Name");
+                    string key = child.Value<string>("Id");
+                    inputNodes.Add(key, value);
+                }
 
-            //Loop over the Output Nodes and get their names
-            foreach (JToken child in dynamoGraph.SelectToken("Outputs").Children())
-            {
-                string name = child.Value<string>("Name");
-                outputNodeNames.Add(name);
+                else if (child.Value<bool>("IsSetAsOutput"))
+                {
+                    string value = child.Value<string>("Name");
+                    string key = child.Value<string>("Id");
+                    outputNodes.Add(key, value);
+                }
             }
-
+            
             //Create a new Player Order Window
-            OrderPlayerInputWindow orderPlayerInput = new OrderPlayerInputWindow(inputNodeNames, outputNodeNames);
+            OrderPlayerInputWindow orderPlayerInput = new OrderPlayerInputWindow(inputNodes, outputNodes);
 
             //Set the Properties of the Class and Show the Window
             orderPlayerInput.dynamoJsonGraph = dynamoGraph;
@@ -642,7 +649,7 @@ namespace BeyondDynamo
         /// <param name="DynamoFilepath">The Filepath to the Dynamo 1.3 File</param>
         public static void SortInputOutputNodesXML(string DynamoFilepath)
         {
-            List<string> inputNodeNames = new List<string>();
+            Dictionary<string, string> inputNodes = new Dictionary<string, string>();
             XmlDocument doc = new XmlDocument();
             doc.Load(DynamoFilepath);
             foreach (XmlElement child in doc.DocumentElement)
@@ -656,7 +663,9 @@ namespace BeyondDynamo
                         {
                             if (attributes["isSelectedInput"].Value == "True")
                             {
-                                inputNodeNames.Add(attributes["nickname"].Value);
+                                string key = attributes["nickname"].Value;
+                                string value = attributes["guid"].Value;
+                                inputNodes.Add(key, value);
                             }
                         }
                         catch { }
@@ -664,9 +673,9 @@ namespace BeyondDynamo
                 }
             }
 
-            List<string> outputNodeNames = new List<string>();
-            OrderPlayerInputWindow orderPlayerInput = new OrderPlayerInputWindow(inputNodeNames, outputNodeNames);
-            if (inputNodeNames.Count <= 0)
+            Dictionary<string, string> outputNodes = new Dictionary<string, string>();
+            OrderPlayerInputWindow orderPlayerInput = new OrderPlayerInputWindow(inputNodes, outputNodes);
+            if (inputNodes.Count <= 0)
             {
                 System.Windows.MessageBox.Show("No input nodes found");
                 return;
@@ -807,9 +816,7 @@ namespace BeyondDynamo
                             {
                                 model.OpenFileFromPath(path, true);
                                 model.CurrentWorkspace.HasUnsavedChanges = true;
-                            }
-
-
+                            };
                         };
 
                         //Add the Item to the Player scripts MenuItem

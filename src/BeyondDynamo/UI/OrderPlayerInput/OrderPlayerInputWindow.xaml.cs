@@ -42,23 +42,41 @@ namespace BeyondDynamo
         /// <summary>
         /// The List with Input Nodes
         /// </summary>
+        public Dictionary<string, string> _InputNodes { get; set; }
+
+        /// <summary>
+        /// This List contains the Names of the Input Nodes
+        /// </summary>
         public List<string> InputNodeNames { get; set; }
+
+        public List<string> InputNodeIds { get; set; }
 
         /// <summary>
         /// The List with Input Nodes
         /// </summary>
+        public Dictionary<string, string> _OutputNodes { get; set; }
+
+        /// <summary>
+        /// This List contains the Names of the Output Nodes
+        /// </summary>
         public List<string> OutputNodeNames { get; set; }
+        public List<string> OutputNodeIds { get; set; }
 
         /// <summary>
         /// Initiates the OrderPlayerInputWindow Class
         /// </summary>
         /// <param name="inputNodeNames"></param>
         /// <param name="outputNodeNames"></param>
-        public OrderPlayerInputWindow(List<string> inputNodeNames, List<string> outputNodeNames)
+        public OrderPlayerInputWindow(Dictionary<string, string> inputNodes, Dictionary<string,string> outputNodes)
         {
             InitializeComponent();
-            InputNodeNames = inputNodeNames;
-            OutputNodeNames = outputNodeNames;
+            this._InputNodes = inputNodes;
+            this._OutputNodes = outputNodes;
+
+            InputNodeNames = new List<string>(this._InputNodes.Values);
+            OutputNodeNames = new List<string>(this._OutputNodes.Values);
+            InputNodeIds = new List<string>(this._InputNodes.Keys);
+            OutputNodeIds= new List<string>(this._OutputNodes.Keys);
 
             //Add the Input Node Names to The ListBox
             foreach (string nodeName in InputNodeNames)
@@ -89,13 +107,24 @@ namespace BeyondDynamo
                 if (selectedIndex > 0)
                 {
                     var itemToMoveUp = this.InputNodeNames[selectedIndex];
+                    var shadowId = this.InputNodeIds[selectedIndex];
+
+                    //Remove the Selected Item from the current Position
                     this.InputNodeNames.RemoveAt(selectedIndex);
+                    this.InputNodeIds.RemoveAt(selectedIndex);
+
+                    //Insert the Selected Item in the New Position
                     this.InputNodeNames.Insert(selectedIndex - 1, itemToMoveUp);
+                    this.InputNodeIds.Insert(selectedIndex - 1, shadowId);
+
+                    // Add the New Items to the Listbox
                     this.InputNodesListBox.Items.Clear();
                     foreach (string name in InputNodeNames)
                     {
                         this.InputNodesListBox.Items.Add(name);
                     }
+
+                    //Change the Selected Item
                     this.InputNodesListBox.SelectedIndex = selectedIndex - 1;
                 }
             }
@@ -118,13 +147,24 @@ namespace BeyondDynamo
                 if (selectedIndex + 1 < this.InputNodeNames.Count)
                 {
                     var itemToMoveDown = this.InputNodeNames[selectedIndex];
+                    var shadowId = this.InputNodeIds[selectedIndex];
+
+                    //Remove the Selected Item from the current Position
                     this.InputNodeNames.RemoveAt(selectedIndex);
+                    this.InputNodeIds.RemoveAt(selectedIndex);
+
+                    //Insert the Selected Item in the New Position
                     this.InputNodeNames.Insert(selectedIndex + 1, itemToMoveDown);
+                    this.InputNodeIds.Insert(selectedIndex + 1, shadowId);
+
+                    // Add the New Items to the Listbox
                     this.InputNodesListBox.Items.Clear();
                     foreach (string name in InputNodeNames)
                     {
                         this.InputNodesListBox.Items.Add(name);
                     }
+
+                    //Change the Selected Item
                     this.InputNodesListBox.SelectedIndex = selectedIndex + 1;
                 }
             }
@@ -134,7 +174,6 @@ namespace BeyondDynamo
         }
         #endregion
 
-        
         #region OUTPUT TAB COMMANDS
         /// <summary>
         /// Moves the selected output name uo
@@ -150,13 +189,24 @@ namespace BeyondDynamo
                 if (selectedIndex > 0)
                 {
                     var itemToMoveUp = this.OutputNodeNames[selectedIndex];
+                    var shadowId = this.OutputNodeIds[selectedIndex];
+
+                    //Remove the Selected Item from the current Position
                     this.OutputNodeNames.RemoveAt(selectedIndex);
+                    this.OutputNodeIds.RemoveAt(selectedIndex);
+
+                    //Insert the Selected Item in the New Position
                     this.OutputNodeNames.Insert(selectedIndex - 1, itemToMoveUp);
+                    this.OutputNodeIds.Insert(selectedIndex - 1, shadowId);
+
+                    // Add the New Items to the Listbox
                     this.OutputNodesListBox.Items.Clear();
                     foreach (string name in OutputNodeNames)
                     {
                         this.OutputNodesListBox.Items.Add(name);
                     }
+
+                    //Change the Selected Item
                     this.OutputNodesListBox.SelectedIndex = selectedIndex - 1;
                 }
             }
@@ -179,13 +229,24 @@ namespace BeyondDynamo
                 if (selectedIndex + 1 < this.OutputNodeNames.Count)
                 {
                     var itemToMoveDown = this.OutputNodeNames[selectedIndex];
+                    var shadowId = this.OutputNodeIds[selectedIndex];
+
+                    //Remove the Selected Item from the current Position
                     this.OutputNodeNames.RemoveAt(selectedIndex);
+                    this.OutputNodeIds.RemoveAt(selectedIndex);
+
+                    //Insert the Selected Item in the New Position
                     this.OutputNodeNames.Insert(selectedIndex + 1, itemToMoveDown);
+                    this.OutputNodeIds.Insert(selectedIndex + 1, shadowId);
+
+                    // Add the New Items to the Listbox
                     this.OutputNodesListBox.Items.Clear();
                     foreach (string name in OutputNodeNames)
                     {
                         this.OutputNodesListBox.Items.Add(name);
                     }
+
+                    //Change the Selected Item
                     this.OutputNodesListBox.SelectedIndex = selectedIndex + 1;
                 }
             }
@@ -224,101 +285,17 @@ namespace BeyondDynamo
             List<string> sortedIds = new List<string>();
 
             //Input Actions
-            #region INPUTS
-            //Clear the Current Order of Input Names
-            InputNodeNames.Clear();
+            #region GET THE ORDERED IDS
 
-            //Fill Input Node Name with the Ordered Values
-            foreach (string name in InputNodesListBox.Items)
+            foreach (string id in InputNodeIds)
             {
-                InputNodeNames.Add(name);
+                sortedIds.Add(id);
+            }
+            foreach (string id in OutputNodeIds)
+            {
+                sortedIds.Add(id);
             }
 
-            //Create a Input Node List with JTokens
-            List<JToken> inputNodes = new List<JToken>();
-
-            //Specify a Input Parent
-            JContainer inputParent = null;
-
-            //Start Looping over the Ordered Names 
-            foreach (string name in InputNodeNames)
-            {
-                //Search for the Input Section on the Dynamo Graph
-                JToken inputSection = dynamoJsonGraph.SelectToken("Inputs");
-
-                //Start Looping over all the Input Nodes
-                foreach (JToken inputNode in inputSection.Children())
-                {
-                    //Get the Name of the Current Input Node in the Input Section
-                    string nodeName = inputNode.Value<string>("Name");
-
-                    //Check if the Node Name is the Same as the Ordered Input Node Name
-                    if (nodeName == name)
-                    {
-                        sortedIds.Add(inputNode.Value<string>("Id"));
-                        inputNodes.Add(inputNode);
-                        inputParent = inputNode.Parent;
-                    }
-                }
-            }
-
-            if (inputNodes.Count > 0)
-            {
-                //Clear the Inputs
-                inputParent.RemoveAll();
-
-                //Add The Ordered Nodes
-                inputParent.Add(inputNodes);
-            }
-
-            #endregion
-
-            #region OUTPUTS
-            //Clear the Current Order of Output Names
-            OutputNodeNames.Clear();
-
-            //Fill Output Node Name with the Ordered Values
-            foreach (string name in OutputNodesListBox.Items)
-            {
-                OutputNodeNames.Add(name);
-            }
-
-            //Create a Output Node List with JTokens
-            List<JToken> outputNodes = new List<JToken>();
-
-            //Specify a Output Parent
-            JContainer outputParent = null;
-
-            //Start Looping over the Ordered Names 
-            foreach (string name in OutputNodeNames)
-            {
-                //Search for the Input Section on the Dynamo Graph
-                JToken outputSection = dynamoJsonGraph.SelectToken("Outputs");
-
-                //Start Looping over all the Input Nodes
-                foreach (JToken outputNode in outputSection.Children())
-                {
-                    //Get the Name of the Current Input Node in the Input Section
-                    string nodeName = outputNode.Value<string>("Name");
-
-                    //Check if the Node Name is the Same as the Ordered Input Node Name
-                    if (nodeName == name)
-                    {
-                        sortedIds.Add(outputNode.Value<string>("Id"));
-                        outputNodes.Add(outputNode);
-                        outputParent = outputNode.Parent;
-                    }
-                }
-            }
-
-            if (outputNodes.Count > 0)
-            {
-                //Clear the outputs
-                outputParent.RemoveAll();
-
-                //Add The Ordered Nodes
-                outputParent.Add(outputNodes);
-            }
             #endregion
 
             #region NODEMODELS
@@ -437,4 +414,6 @@ namespace BeyondDynamo
             this.Close();
         }
     }
+
+    
 }
