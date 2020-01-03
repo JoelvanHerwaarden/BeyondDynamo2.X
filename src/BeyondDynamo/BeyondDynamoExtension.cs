@@ -458,7 +458,7 @@ namespace BeyondDynamo
             {
                 Content = "This will let you search for Nodes in the Current workspace"
             };
-            BDmenuItem.Items.Add(NodeCollector);
+            //BDmenuItem.Items.Add(NodeCollector);
 
             EditNotes = new MenuItem { Header = "Edit Note Text" };
             EditNotes.Click += (sender, args) =>

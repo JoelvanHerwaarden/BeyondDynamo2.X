@@ -14,6 +14,11 @@ using Newtonsoft.Json.Linq;
 using Forms = System.Windows.Forms;
 using Controls = System.Windows.Controls;
 using Dynamo.UI.Commands;
+using Dynamo.Engine;
+using Dynamo.Scheduler;
+using Dynamo.Graph.Nodes.NodeLoaders;
+using Dynamo.Core;
+
 namespace BeyondDynamo
 {
     /// <summary>
@@ -747,6 +752,7 @@ namespace BeyondDynamo
         public static void RetrievePlayerFiles(Controls.MenuItem owner, DynamoViewModel viewModel, string filePath, List<Controls.MenuItem> extraItems)
         {
             DynamoModel model = viewModel.Model;
+
             // Check if the Filepath is not Empty
             if (filePath != "")
             {
@@ -767,6 +773,11 @@ namespace BeyondDynamo
                         //Create a clicking Event
                         item.Click += (sender, args) =>
                         {
+
+
+                            //Things we need to Build the Imported Model
+                            EngineController engineController = viewModel.EngineController;
+
                             //Check if the Current Model need Saving
                             if (model.CurrentWorkspace.HasUnsavedChanges)
                             {
@@ -779,44 +790,39 @@ namespace BeyondDynamo
                                     {
                                         //If there is no Filepath, show a Save as dialog
                                         Forms.SaveFileDialog dialog = new Forms.SaveFileDialog();
+                                        dialog.FileName = "Home";
                                         dialog.AddExtension = true;
                                         dialog.DefaultExt = "dyn";
                                         dialog.Filter = "Dynamo Files (*.dyn)|*.dyn";
                                         if (Forms.DialogResult.OK == dialog.ShowDialog())
                                         {
-                                            // Save the File
-                                            model.CurrentWorkspace.Save(dialog.FileName);
-
-                                            //Open the new File
-                                            model.OpenFileFromPath(path, true);
-                                            model.CurrentWorkspace.HasUnsavedChanges = true;
+                                            viewModel.SaveAsCommand.Execute(dialog.FileName);
                                         }
                                     }
                                     //If there is a Filepath, Save the File
                                     else
                                     {
                                         //Save the File
-                                        model.CurrentWorkspace.Save(model.CurrentWorkspace.FileName);
-
-                                        //Open the New File
-                                        model.OpenFileFromPath(path, true);
-                                        model.CurrentWorkspace.HasUnsavedChanges = true;
+                                        viewModel.SaveCommand.Execute(viewModel);
                                     }
                                 }
-                                // If the user doesn't want to save the current file, then open the Player file
-                                else if (result == Forms.DialogResult.No)
+                                else if (result == Forms.DialogResult.Cancel)
                                 {
-                                    model.OpenFileFromPath(path, true);
-                                    model.CurrentWorkspace.HasUnsavedChanges = true;
+                                    return;
                                 }
                             }
 
                             //If there are No unsaved changes, Open the File
-                            else
-                            {
-                                model.OpenFileFromPath(path, true);
-                                model.CurrentWorkspace.HasUnsavedChanges = true;
-                            };
+                            model.OpenFileFromPath(path, true);
+                            model.CurrentWorkspace.HasUnsavedChanges = true;
+
+                            //Convert the Dynamo File to a Json Text
+                            string jsonString = File.ReadAllText(path);
+
+                            //Create extra WorkspaceViewInfo from the Json string
+                            ExtraWorkspaceViewInfo workspaceViewInfo = WorkspaceViewModel.ExtraWorkspaceViewInfoFromJson(jsonString);
+
+                            model.CurrentWorkspace.UpdateWithExtraWorkspaceViewInfo(workspaceViewInfo);
                         };
 
                         //Add the Item to the Player scripts MenuItem

@@ -1,20 +1,9 @@
 ﻿using Dynamo.Graph.Nodes;
-using Dynamo.UI.Commands;
 using Dynamo.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace BeyondDynamo
 {
@@ -69,29 +58,37 @@ namespace BeyondDynamo
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string searchTerm = searchBox.Text;
-            this.listView.Items.Clear();
-            this.foundNodes.Clear();
-            if (searchTerm != "")
+            try
             {
-                for (int i = 0; i < nodeNames.Count; i++ )
+                string searchTerm = searchBox.Text;
+                this.listView.Items.Clear();
+                this.foundNodes.Clear();
+                if (searchTerm != "")
                 {
-                    string name = nodeNames[i];
-                    if (name.ToUpper().Contains(searchTerm.ToUpper()))
+                    for (int i = 0; i < nodeNames.Count; i++)
+                    {
+                        string name = nodeNames[i];
+                        if (name.ToUpper().Contains(searchTerm.ToUpper()))
+                        {
+                            this.listView.Items.Add(name);
+                            this.foundNodes.Add(nodes[i]);
+                        }
+                    }
+                }
+                else
+                {
+                    this.foundNodes = nodes;
+                    foreach (string name in nodeNames)
                     {
                         this.listView.Items.Add(name);
-                        this.foundNodes.Add(nodes[i]);
                     }
                 }
             }
-            else
+            catch(Exception exception)
             {
-                this.foundNodes = nodes;
-                foreach (string name in nodeNames)
-                {
-                    this.listView.Items.Add(name);
-                }
+                String var = "do nothing, but leave this.";
             }
+            
         }
 
         private void ZoomToNode(NodeModel node, DynamoViewModel dynamoViewModel)
