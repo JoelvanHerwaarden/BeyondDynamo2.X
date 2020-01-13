@@ -596,7 +596,7 @@ namespace BeyondDynamo
             {
                 if (note.IsSelected)
                 {
-                    TextBoxWindow textBox = new TextBoxWindow(note);
+                    NoteTextBoxWindow textBox = new NoteTextBoxWindow(note);
                     textBox.Show();
                 }
             }
@@ -690,56 +690,6 @@ namespace BeyondDynamo
             orderPlayerInput.dynamoVersion = "XML";
             orderPlayerInput.dynamoGraphPath = DynamoFilepath;
             orderPlayerInput.Show();
-        }
-
-        /// <summary>
-        /// Mark all selected nodes as input nodes
-        /// </summary>
-        /// <param name="model"></param>
-        public static void MarkAsInput(WorkspaceModel model)
-        {
-            foreach (NodeModel node in model.CurrentSelection)
-            {
-                node.IsSetAsInput = true;
-            }
-        }
-
-        /// <summary>
-        /// Mark all selected nodes as output nodes
-        /// </summary>
-        /// <param name="model"></param>
-        public static void MarkAsOutput(WorkspaceModel model)
-        {
-            foreach (NodeModel node in model.CurrentSelection)
-            {
-                node.IsSetAsOutput = true;
-            }
-        }
-
-        /// <summary>
-        /// Unmark all selected nodes as input nodes
-        /// </summary>
-        /// <param name="model"></param>
-        public static void UnMarkAsInput(WorkspaceModel model)
-        {
-            foreach (NodeModel node in model.CurrentSelection)
-            {
-               node.IsSetAsInput = false;
-            }
-        }
-        
-        /// <summary>
-        /// Unmark all selected nodes as output nodes
-        /// </summary>
-        /// <param name="model"></param>
-        public static void UnMarkAsOutput(WorkspaceModel model)
-        {
-            foreach (NodeModel node in model.CurrentSelection)
-            {
-                node.Description = "This is Description";
-                node.ToolTipText = "This is the ToolTip";
-                
-            }
         }
 
         /// <summary>
@@ -842,6 +792,19 @@ namespace BeyondDynamo
             {
                 owner.Items.Add(extraItems[0]);
             }
+        }
+
+        /// <summary>
+        /// Changes the Description of a Dynamo Graph
+        /// </summary>
+        /// <param name="currentWorkspace"></param>
+        public static void ChangeDescription(WorkspaceModel currentWorkspace)
+        {
+            string text = currentWorkspace.Description;
+            TextBoxWindow textBox = new TextBoxWindow(text);
+            textBox.ShowDialog();
+            currentWorkspace.Description = textBox.Text;
+            currentWorkspace.HasUnsavedChanges = true;
         }
     }
 }

@@ -7,6 +7,11 @@ Copy BeyondDynamo_ViewExtensionDefinition.xml to C:\Program Files\Dynamo\Dynamo 
 
 
 FOR REVIT 2020:
+Copy BeyondDynamo.dll to C:\Program Files\Autodesk\Revit 2020\AddIns\DynamoForRevit
+
+Copy BeyondDynamo_ViewExtensionDefinition.xml to C:\Program Files\Autodesk\Revit 2020\AddIns\DynamoForRevit\viewExtensions
+
+FOR CIVIL3D 2020:
 Copy BeyondDynamo.dll to C:\Program Files\Autodesk\AutoCAD 2020\C3D\Dynamo\Core
 
 Copy BeyondDynamo_ViewExtensionDefinition.xml to C:\Program Files\Autodesk\AutoCAD 2020\C3D\Dynamo\Core\viewExtensions

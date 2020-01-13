@@ -150,6 +150,7 @@
   <ItemGroup>
     <Compile Include="BeyondDynamoConfig.cs" />
     <Compile Include="BeyondDynamoExtension.cs" />
+    <Compile Include="BeyondDynamoSearchView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BeyondDynamoFunctions.cs" />
     <Compile Include="resources.Designer.cs">
@@ -165,28 +166,28 @@
     </Compile>
     <Compile Include="UI\ChangeNodeColor\ChangeNodeColorsViewModel.cs" />
     <Compile Include="UI\ChangeNodeColor\ChangeNodeColorsWindow.xaml.cs" />
-    <Compile Include="UI\NodesCollector\NodeCollectorViewModel.cs" />
-    <Compile Include="UI\NodesCollector\NodeCollectorWindow.xaml.cs">
-      <DependentUpon>NodeCollectorWindow.xaml</DependentUpon>
+    <Compile Include="UI\SearchView\SearchViewControl.xaml.cs">
+      <DependentUpon>SearchViewControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\OrderPlayerInput\OrderPlayerInputWindow.xaml.cs">
       <DependentUpon>OrderPlayerInputWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\RemoveTraceData\RemoveTraceDataViewModel.cs" />
     <Compile Include="UI\RemoveTraceData\RemoveTraceDataWindow.xaml.cs" />
-    <Compile Include="UI\TextBox\TextBoxViewModel.cs" />
+    <Compile Include="UI\TextBox\TextBoxViewMode.cs" />
+    <Compile Include="UI\TextBox\NoteTextBoxViewModel.cs" />
     <Compile Include="UI\TextBox\TextBoxWindow.xaml.cs">
       <DependentUpon>TextBoxWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\TextBox\NoteTextBoxWindow.xaml.cs">
+      <DependentUpon>NoteTextBoxWindow.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="UI\TextBox\app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="BeyondDynamo_ViewExtensionDefinition.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="BeyondDynamo_ViewExtensionDefinition.xml" />
     <None Include="Resources\BeyondDynamo Banner.png" />
   </ItemGroup>
   <ItemGroup>
@@ -194,7 +195,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UI\NodesCollector\NodeCollectorWindow.xaml">
+    <Page Include="UI\SearchView\SearchViewControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -207,6 +208,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\TextBox\TextBoxWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\TextBox\NoteTextBoxWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -224,7 +229,7 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy /y $(TargetDir)$(ProjectName).dll "C:\Users\907335\GitHub\BeyondDynamo2.X\latestBuild\"
+copy /y $(TargetDir)$(ProjectName).dll "C:\Program Files\Autodesk\AutoCAD 2020\C3D\Dynamo\Core\"</PostBuildEvent>
   </PropertyGroup>
 </Project>

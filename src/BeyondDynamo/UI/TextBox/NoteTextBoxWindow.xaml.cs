@@ -19,21 +19,23 @@ namespace BeyondDynamo
     /// <summary>
     /// Interaction logic for TextBoxWindow.xaml
     /// </summary>
-    public partial class TextBoxWindow : Window
+    public partial class NoteTextBoxWindow : Window
     {
+        private NoteModel note { get; set; }
 
         /// <summary>
         /// The Typed Text in the Test Editor Window
         /// </summary>
-        public string Text { get; set; }
+        public string text { get; set; }
 
         /// <summary>
         /// The Text Editor Window
         /// </summary>
         /// <param name="startText"></param>
-        public TextBoxWindow(string text)
+        public NoteTextBoxWindow(NoteModel Note)
         {
-            Text = text;
+            this.note = Note;
+            text = Note.Text;
             InitializeComponent();
             textBox.Text = text;
         }
@@ -45,13 +47,12 @@ namespace BeyondDynamo
         /// <param name="e"></param>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            this.Text = this.textBox.Text;
             this.Close();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            this.Text = this.textBox.Text;
+            note.Text = this.textBox.Text;
         }
     }
 }

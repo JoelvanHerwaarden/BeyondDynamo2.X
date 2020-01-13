@@ -2,9 +2,9 @@
 using Dynamo.Core;
 using Dynamo.Extensions;
 
-namespace BeyondDynamo.UI
+namespace BeyondDynamo
 {
-    class NodeCollectorViewModel : NotificationObject, IDisposable
+    class NoteTextBoxViewModel : NotificationObject, IDisposable
     {
         private ReadyParams readyParams;
         public ReadyParams ReadyParamType
@@ -19,7 +19,7 @@ namespace BeyondDynamo.UI
         {
             return readyParams;
         }
-        public NodeCollectorViewModel(ReadyParams p)
+        public NoteTextBoxViewModel(ReadyParams p)
         {
             readyParams = p;
         }

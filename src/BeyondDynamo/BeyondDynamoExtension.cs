@@ -12,6 +12,8 @@ using Newtonsoft.Json.Linq;
 using Dynamo.Models;
 using Dynamo.Graph.Workspaces;
 using Dynamo.Graph.Nodes;
+using Dynamo.Controls;
+using System.Drawing;
 
 namespace BeyondDynamo
 {
@@ -105,6 +107,8 @@ namespace BeyondDynamo
         /// </summary>
         private MenuItem RemoveBindingsCurrent;
 
+        private MenuItem DynamoChainRun;
+
         /// <summary>
         /// About Window Menu Item
         /// </summary>
@@ -145,7 +149,7 @@ namespace BeyondDynamo
                 releasedVersions.Sort();
                 this.latestVersion = releasedVersions[releasedVersions.Count - 1];
             }
-            catch(Exception exception)
+            catch
             { 
                 string message = "Could not get a response from GitHub for version control" + "\n\n\n" + "Try again later";
                 Forms.MessageBox.Show(message, "Beyond Dynamo 2.X", Forms.MessageBoxButtons.OK, Forms.MessageBoxIcon.Warning);
@@ -214,7 +218,7 @@ namespace BeyondDynamo
             {
                 BDmenuItem.Items.Add(LatestVersion);
             }
-            
+
 
             #region THIS CAN BE RUN ANYTIME
             ChangeNodeColors = new MenuItem { Header = "Change Node Color" };
@@ -282,7 +286,7 @@ namespace BeyondDynamo
                 fileDialog.Filter = "Dynamo Files (*.dyn)|*.dyn";
                 if (fileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    if(BeyondDynamoFunctions.IsFileOpen(VM, fileDialog.FileName))
+                    if (BeyondDynamoFunctions.IsFileOpen(VM, fileDialog.FileName))
                     {
                         Forms.MessageBox.Show("Please close the file before using this command", "Order Input/Output Nodes");
                         return;
@@ -376,7 +380,7 @@ namespace BeyondDynamo
                 {
                     return;
                 }
-                
+
                 //Save the Graph, Close the Graph, Try to Remove Trace Data, Open the Graph again.
                 workspaceViewModel.DynamoViewModel.SaveAs(filePath);
                 VM.Model.RemoveWorkspace(VM.Model.CurrentWorkspace);
@@ -427,38 +431,15 @@ namespace BeyondDynamo
             NodeCollector = new MenuItem { Header = "Search Workspace" };
             NodeCollector.Click += (sender, args) =>
             {
-                List<string> nodeNames = new List<string>();
-                // Make a Viewmodel for the Change Node Color Window
-                foreach (NodeModel node in VM.Model.CurrentWorkspace.Nodes)
-                {
-                    nodeNames.Add(node.Name);
-                }
-
-                //Create a view model for the UI
-                var viewModel = new BeyondDynamo.UI.NodeCollectorViewModel(p);
-
-                //Get all the Nodes in The Workspace with Names
-                List<dynamic> InputNodes = BeyondDynamoFunctions.GetNodes(VM.Model.CurrentWorkspace);
-
-                //Create a new node collector UI
-                NodeCollectorWindow nodeCollectorWindow = new NodeCollectorWindow(InputNodes, VM)
-                {
-                    // Set the data context for the main grid in the window.
-                    MainGrid = { DataContext = viewModel },
-                    // Set the owner of the window to the Dynamo window.
-                    Owner = p.DynamoWindow,
-                };
-                nodeCollectorWindow.Left = nodeCollectorWindow.Owner.Left + 400;
-                nodeCollectorWindow.Top = nodeCollectorWindow.Owner.Top + 200;
-
-                //Show the Color window
-                nodeCollectorWindow.Show();
+                BeyondDynamoSearchView panelView = new BeyondDynamoSearchView();
+                SearchViewControl SearchControl = new SearchViewControl(VM);
+                p.AddToExtensionsSideBar(panelView, SearchControl);
             };
             NodeCollector.ToolTip = new ToolTip()
             {
                 Content = "This will let you search for Nodes in the Current workspace"
             };
-            //BDmenuItem.Items.Add(NodeCollector);
+            BDmenuItem.Items.Add(NodeCollector);
 
             EditNotes = new MenuItem { Header = "Edit Note Text" };
             EditNotes.Click += (sender, args) =>
@@ -499,9 +480,9 @@ namespace BeyondDynamo
                 Content = "Unfreezes all selected nodes and groups"
             };
             BDmenuItem.Items.Add(UnfreezeNodes);
-            
-            #endregion 
-            
+
+            #endregion
+
             AboutItem = new MenuItem { Header = "About Beyond Dynamo"};
             AboutItem.Click += (sender, args) =>
             {
@@ -518,6 +499,21 @@ namespace BeyondDynamo
             BDmenuItem.Items.Add(AboutItem);
 
             p.dynamoMenu.Items.Add(BDmenuItem);
+
+            #region ADD GRAPH DESCRIPTION
+
+            MenuItem editDescription = new MenuItem() { Header = "Edit Workspace Description" };
+            editDescription.Click += (sender, args) =>
+            {
+                if (VM.Workspaces.Count < 1)
+                {
+                    Forms.MessageBox.Show("No Workspace found", "Beyond Dynamo");
+                    return;
+                }
+                BeyondDynamoFunctions.ChangeDescription(VM.CurrentSpace);
+            };
+            p.AddMenuItem(MenuBarType.File, editDescription, 3);
+            #endregion ADD GRAPH DESCRIPTION
             
         }
 
