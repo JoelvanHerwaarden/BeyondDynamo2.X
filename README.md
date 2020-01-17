@@ -1,5 +1,5 @@
 ## BeyondDynamo2.X
-#A plug-in for Dynamo BIM 2.x which extends the functionalities of Dynamo
+A plug-in for Dynamo BIM 2.x which extends the functionalities of Dynamo
 
 Beyond Dynamo is a Plug-in for Dynamo BIM. You can use it in any variant of Dynamo (Revit, Civil 3D, Alias etc.)
 
