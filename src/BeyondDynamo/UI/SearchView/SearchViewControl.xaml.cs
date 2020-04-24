@@ -33,12 +33,6 @@ namespace BeyondDynamo
         public SearchViewControl(DynamoViewModel DynamoViewModel)
         {
             IEnumerator<NodeSearchElementViewModel> enumerator = DynamoViewModel.SearchViewModel.FilteredResults.GetEnumerator();
-            string mes = "";
-            while (enumerator.MoveNext())
-            {
-                mes += enumerator.Current.Name + "\n";
-            }
-            Forms.MessageBox.Show(mes);
 
             InitializeComponent();
 
@@ -82,7 +76,10 @@ namespace BeyondDynamo
             {
                 this.Refresh();
             };
-
+            DynamoViewModel.Model.WorkspaceOpening += (obj) =>
+            {
+                this.Refresh();
+            };
         }
 
         /// <summary>
@@ -170,6 +167,5 @@ namespace BeyondDynamo
                 this.listView.Items.Add(name);
             }
         }
-
     }
 }

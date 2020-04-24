@@ -14,6 +14,17 @@ using Dynamo.Graph.Workspaces;
 using Dynamo.Graph.Nodes;
 using Dynamo.Controls;
 using System.Drawing;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using ProtoCore.Mirror;
+using ProtoCore.AST.AssociativeAST;
+using Dynamo.Wpf.ViewModels.Watch3D;
+using System.Collections.ObjectModel;
+using System.Windows;
+using Xceed.Wpf.AvalonDock.Controls;
+using System.Windows.Media;
+using Dynamo.UI.Controls;
+using Dynamo.Configuration;
 
 namespace BeyondDynamo
 {
@@ -68,6 +79,11 @@ namespace BeyondDynamo
         private MenuItem GroupColor;
 
         /// <summary>
+        /// This Deselects the labels in the Background
+        /// </summary>
+        private MenuItem DeselectNodeLabels;
+
+        /// <summary>
         /// Import Script Menu Item
         /// </summary>
         private MenuItem ScriptImport;
@@ -75,7 +91,7 @@ namespace BeyondDynamo
         /// <summary>
         /// Search Nodes Menu Item
         /// </summary>
-        private MenuItem NodeCollector;
+        private MenuItem SearchWorkspace;
 
         /// <summary>
         /// Edit Notes Menu Item
@@ -101,31 +117,31 @@ namespace BeyondDynamo
         /// Player script menu item
         /// </summary>
         private MenuItem PlayerScripts;
-        
+
+        private MenuItem OpenPlayerPath;
+
+        private MenuItem SetPlayerPath;
+
         /// <summary>
         /// The Menu Item to remove the binding on the current graph
         /// </summary>
         private MenuItem RemoveBindingsCurrent;
 
-        private MenuItem DynamoChainRun;
-
         /// <summary>
         /// About Window Menu Item
         /// </summary>
         private MenuItem AboutItem;
+
+        private MenuItem OpenLog;
         
         public void Dispose() { }
 
         public void Startup(ViewStartupParams p)
         {
+            Utils.SetupLog();
+            Utils.LogMessage("Get Latest version Started...");
             try
             {
-                ServicePointManager.Expect100Continue = true;
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
-                       | SecurityProtocolType.Tls11
-                       | SecurityProtocolType.Tls12
-                       | SecurityProtocolType.Ssl3;
-
                 List<double> releasedVersions = new List<double>();
 
                 HttpWebRequest webRequest = WebRequest.CreateHttp(RequestUri);
@@ -148,20 +164,20 @@ namespace BeyondDynamo
                 }
                 releasedVersions.Sort();
                 this.latestVersion = releasedVersions[releasedVersions.Count - 1];
+                Utils.LogMessage("Get Latest verion Completed!");
             }
-            catch
-            { 
-                string message = "Could not get a response from GitHub for version control" + "\n\n\n" + "Try again later";
-                Forms.MessageBox.Show(message, "Beyond Dynamo 2.X", Forms.MessageBoxButtons.OK, Forms.MessageBoxIcon.Warning);
+            catch(Exception e)
+            {
+                Utils.LogMessage("Get Latest verion Failed!\n" + e.Message);
                 this.latestVersion = this.currentVersion;
             }
+            Utils.LogMessage("Latest version = " + this.latestVersion.ToString()); ;
+
+            Utils.LogMessage("Creating Configuration File Started...");
             Directory.CreateDirectory(configFolderPath);
             config = new BeyondDynamoConfig(this.configFilePath);
-        }
-        
-        private void CurrentSpaceViewModel_WorkspacePropertyEditRequested(Dynamo.Graph.Workspaces.WorkspaceModel workspace)
-        {
-            throw new NotImplementedException();
+
+            Utils.LogMessage("Creating Configuration File Completed!");
         }
 
         public void Shutdown()
@@ -206,9 +222,11 @@ namespace BeyondDynamo
         /// <param name="p">Parameters</param>
         public void Loaded(ViewLoadedParams p)
         {
+            Utils.LogMessage("Loading Menu Items Started...");
             BDmenuItem = new MenuItem { Header = "Beyond Dynamo" };
             DynamoViewModel VM = p.DynamoWindow.DataContext as DynamoViewModel;
 
+            Utils.LogMessage("Loading Menu Items: Latest Version Started...");
             LatestVersion = new MenuItem { Header = "New version available! Download now!" };
             LatestVersion.Click += (sender, args) =>
             {
@@ -218,9 +236,14 @@ namespace BeyondDynamo
             {
                 BDmenuItem.Items.Add(LatestVersion);
             }
+            else { Utils.LogMessage("Loading Menu Items: Latest Version is installed"); }
+
+            Utils.LogMessage("Loading Menu Items: Latest Version Completed");
 
 
             #region THIS CAN BE RUN ANYTIME
+
+            Utils.LogMessage("Loading Menu Items: Chang Node Colors Started...");
             ChangeNodeColors = new MenuItem { Header = "Change Node Color" };
             ChangeNodeColors.Click += (sender, args) =>
             {
@@ -249,7 +272,10 @@ namespace BeyondDynamo
                 Content = "This lets you change the Node Color Settings in your Dynamo nodes in In-Active, Active, Warning and Error state"
             };
             BDmenuItem.Items.Add(ChangeNodeColors);
+            Utils.LogMessage("Loading Menu Items: Chang Node Colors Completed");
 
+
+            Utils.LogMessage("Loading Menu Items: Batch Remove Trace Data Started...");
             BatchRemoveTraceData = new MenuItem { Header = "Remove Session Trace Data from Dynamo Graphs" };
             BatchRemoveTraceData.Click += (sender, args) =>
             {
@@ -277,7 +303,9 @@ namespace BeyondDynamo
                 "\nIt can slow your scripts down if you run them because it first tries the regain the last session in which it was used."
             };
             BDmenuItem.Items.Add(BatchRemoveTraceData);
+            Utils.LogMessage("Loading Menu Items: Batch Remove Trace Data Completed");
 
+            Utils.LogMessage("Loading Menu Items: Order Player Nodes Started...");
             OrderPlayerInput = new MenuItem { Header = "Order Input/Output Nodes" };
             OrderPlayerInput.Click += (sender, args) =>
             {
@@ -318,16 +346,20 @@ namespace BeyondDynamo
                 "\nOther nodes will show up in Refinery"
             };
             BDmenuItem.Items.Add(OrderPlayerInput);
+            Utils.LogMessage("Loading Menu Items: Order Player Nodes Completed");
 
+            Utils.LogMessage("Loading Menu Items: Player Scripts Started...");
             PlayerScripts = new MenuItem { Header = "Player Graphs" };
-            MenuItem openPlayerPath = new MenuItem { Header = "Open Player Path" };
-            openPlayerPath.Click += (sender, args) =>
+            OpenPlayerPath = new MenuItem { Header = "Open Player Path" };
+            OpenPlayerPath.Click += (sender, args) =>
             {
                 System.Diagnostics.Process.Start(this.config.playerPath);
             };
-            MenuItem setPlayerPath = new MenuItem { Header = "Set Player Path" };
-            List<MenuItem> extraMenuItems = new List<MenuItem> { setPlayerPath, openPlayerPath };
-            setPlayerPath.Click += (sender, args) =>
+            Utils.LogMessage("Loading Menu Items: Player Scripts Completed"); 
+
+            SetPlayerPath = new MenuItem { Header = "Set Player Path" };
+            List<MenuItem> extraMenuItems = new List<MenuItem> { SetPlayerPath, OpenPlayerPath };
+            SetPlayerPath.Click += (sender, args) =>
             {
                 Forms.FolderBrowserDialog browserDialog = new Forms.FolderBrowserDialog();
                 if (this.config.playerPath != null)
@@ -346,18 +378,20 @@ namespace BeyondDynamo
             };
             if (this.config.playerPath != null)
             {
-                BeyondDynamoFunctions.RetrievePlayerFiles(PlayerScripts, VM, this.config.playerPath, extraMenuItems);
+                if (Directory.Exists(Path.GetDirectoryName(this.config.playerPath)))
+                {
+                    BeyondDynamoFunctions.RetrievePlayerFiles(PlayerScripts, VM, this.config.playerPath, extraMenuItems);
+                }
             }
             else
             {
-                PlayerScripts.Items.Add(setPlayerPath);
+                PlayerScripts.Items.Add(SetPlayerPath);
             }
             BDmenuItem.Items.Add(PlayerScripts);
 
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(new Separator());
             #endregion
-
 
             # region THESE FUNCTION ONLY WORK INSIDE A SCRIPT
             RemoveBindingsCurrent = new MenuItem { Header = "Remove Bindings from Current Graph" };
@@ -403,6 +437,27 @@ namespace BeyondDynamo
             };
             BDmenuItem.Items.Add(RemoveBindingsCurrent);
 
+            DeselectNodeLabels = new MenuItem { Header = "Deselect Node Data" };
+            DeselectNodeLabels.Click += (sender, args) =>
+            {
+                foreach (NodeModel node in VM.CurrentSpace.Nodes)
+                {
+                    node.DisplayLabels = true;
+                }
+                VM.ShowPreviewBubbles = false;
+                foreach (NodeModel node in VM.CurrentSpace.Nodes)
+                {
+                    node.DisplayLabels = false;
+                }
+                VM.ShowPreviewBubbles = true;
+            };
+            DeselectNodeLabels.ToolTip = new ToolTip()
+            {
+                Content = "If you have selected something in the preview bubble of a Node, it will be selected in the Dynamo background.\n\n" +
+                "This deselects all the labels in the preview."
+            };
+            BDmenuItem.Items.Add(DeselectNodeLabels);
+
             GroupColor = new MenuItem { Header = "Change Group Color" };
             GroupColor.Click += (sender, args) =>
             {
@@ -428,18 +483,18 @@ namespace BeyondDynamo
             };
             BDmenuItem.Items.Add(ScriptImport);
 
-            NodeCollector = new MenuItem { Header = "Search Workspace" };
-            NodeCollector.Click += (sender, args) =>
+            SearchWorkspace = new MenuItem { Header = "Search Workspace" };
+            SearchWorkspace.Click += (sender, args) =>
             {
                 BeyondDynamoSearchView panelView = new BeyondDynamoSearchView();
                 SearchViewControl SearchControl = new SearchViewControl(VM);
                 p.AddToExtensionsSideBar(panelView, SearchControl);
             };
-            NodeCollector.ToolTip = new ToolTip()
+            SearchWorkspace.ToolTip = new ToolTip()
             {
                 Content = "This will let you search for Nodes in the Current workspace"
             };
-            BDmenuItem.Items.Add(NodeCollector);
+            BDmenuItem.Items.Add(SearchWorkspace);
 
             EditNotes = new MenuItem { Header = "Edit Note Text" };
             EditNotes.Click += (sender, args) =>
@@ -480,7 +535,6 @@ namespace BeyondDynamo
                 Content = "Unfreezes all selected nodes and groups"
             };
             BDmenuItem.Items.Add(UnfreezeNodes);
-
             #endregion
 
             AboutItem = new MenuItem { Header = "About Beyond Dynamo"};
@@ -497,6 +551,13 @@ namespace BeyondDynamo
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(AboutItem);
+            OpenLog = new MenuItem() { Header = "Open Beyond Dynamo Log" };
+            OpenLog.Click += (sender, args) =>
+            {
+                Utils.OpenLog();
+            };
+            OpenLog.ToolTip = new ToolTip() { Content = "Opens the Log file for Beyond Dynamo. \nThis is where all the activities are logged for Beyond Dynamo." };
+            BDmenuItem.Items.Add(OpenLog);
 
             p.dynamoMenu.Items.Add(BDmenuItem);
 
@@ -514,8 +575,8 @@ namespace BeyondDynamo
             };
             p.AddMenuItem(MenuBarType.File, editDescription, 3);
             #endregion ADD GRAPH DESCRIPTION
-            
-        }
 
+            Utils.LogMessage("Loading all Menu Items Completed");
+        }
     }
 }
