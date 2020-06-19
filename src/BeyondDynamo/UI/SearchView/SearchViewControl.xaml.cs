@@ -32,7 +32,7 @@ namespace BeyondDynamo
         /// <param name="startText"></param>
         public SearchViewControl(DynamoViewModel DynamoViewModel)
         {
-            IEnumerator<NodeSearchElementViewModel> enumerator = DynamoViewModel.SearchViewModel.FilteredResults.GetEnumerator();
+            //IEnumerator<NodeSearchElementViewModel> enumerator = DynamoViewModel.SearchViewModel.FilteredResults.GetEnumerator();
 
             InitializeComponent();
 

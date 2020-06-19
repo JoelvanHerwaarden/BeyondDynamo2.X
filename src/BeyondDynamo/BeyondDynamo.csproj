@@ -194,6 +194,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="BeyondDynamo_ViewExtensionDefinition.xml" />
+    <EmbeddedResource Include="Resources\palette.png" />
     <None Include="Resources\BeyondDynamo Banner.png" />
   </ItemGroup>
   <ItemGroup>

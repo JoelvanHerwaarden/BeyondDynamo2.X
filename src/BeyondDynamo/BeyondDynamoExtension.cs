@@ -25,6 +25,7 @@ using Xceed.Wpf.AvalonDock.Controls;
 using System.Windows.Media;
 using Dynamo.UI.Controls;
 using Dynamo.Configuration;
+using System.Reflection;
 
 namespace BeyondDynamo
 {
@@ -118,8 +119,14 @@ namespace BeyondDynamo
         /// </summary>
         private MenuItem PlayerScripts;
 
+        /// <summary>
+        /// Open Player Folderpath Menu Item
+        /// </summary>
         private MenuItem OpenPlayerPath;
 
+        /// <summary>
+        /// Set Player Folderpath Menu Item
+        /// </summary>
         private MenuItem SetPlayerPath;
 
         /// <summary>
@@ -132,6 +139,9 @@ namespace BeyondDynamo
         /// </summary>
         private MenuItem AboutItem;
 
+        /// <summary>
+        /// Open Log File Menu Item
+        /// </summary>
         private MenuItem OpenLog;
         
         public void Dispose() { }
@@ -142,6 +152,12 @@ namespace BeyondDynamo
             Utils.LogMessage("Get Latest version Started...");
             try
             {
+
+                ServicePointManager.Expect100Continue = true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                       | SecurityProtocolType.Tls11
+                       | SecurityProtocolType.Tls12
+                       | SecurityProtocolType.Ssl3;
                 List<double> releasedVersions = new List<double>();
 
                 HttpWebRequest webRequest = WebRequest.CreateHttp(RequestUri);
@@ -355,7 +371,6 @@ namespace BeyondDynamo
             {
                 System.Diagnostics.Process.Start(this.config.playerPath);
             };
-            Utils.LogMessage("Loading Menu Items: Player Scripts Completed"); 
 
             SetPlayerPath = new MenuItem { Header = "Set Player Path" };
             List<MenuItem> extraMenuItems = new List<MenuItem> { SetPlayerPath, OpenPlayerPath };
@@ -388,6 +403,7 @@ namespace BeyondDynamo
                 PlayerScripts.Items.Add(SetPlayerPath);
             }
             BDmenuItem.Items.Add(PlayerScripts);
+            Utils.LogMessage("Loading Menu Items: Player Scripts Completed");
 
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(new Separator());
@@ -474,6 +490,7 @@ namespace BeyondDynamo
             {
                 //Set the Run Type on Manual
                 VM.CurrentSpaceViewModel.RunSettingsViewModel.SelectedRunTypeItem = new Dynamo.Wpf.ViewModels.RunTypeItem(RunType.Manual);
+
                 //Try to Import the Graph
                 BeyondDynamoFunctions.ImportFromScript(VM);
             };
