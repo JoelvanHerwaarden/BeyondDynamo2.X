@@ -25,6 +25,8 @@ using Dynamo.Controls;
 using Xceed.Wpf.AvalonDock.Controls;
 using System.Windows.Media;
 using Shapes = System.Windows.Shapes;
+using Dynamo.Utilities;
+using DSCore;
 
 namespace BeyondDynamo
 {
@@ -351,7 +353,7 @@ namespace BeyondDynamo
         private static void ImportJsonDynamo(DynamoViewModel viewModel, string DynamoFilepath)
         {
             WorkspaceModel model = viewModel.Model.CurrentWorkspace;
-            
+
             //Create two lists for the Selection of the imported model
             List<string> guidList = new List<string>();
             List<dynamic> selectionList = new List<dynamic>();
@@ -392,6 +394,15 @@ namespace BeyondDynamo
             };
             foreach (NodeModel node in importedModel.Nodes)
             {
+                node.GUID = Guid.NewGuid();
+                foreach (PortModel port in node.InPorts)
+                {
+                    port.GUID = Guid.NewGuid();
+                }
+                foreach (PortModel port in node.OutPorts)
+                {
+                    port.GUID = Guid.NewGuid();
+                }
                 guidList.Add(node.GUID.ToString());
                 XmlElement nodeAsXML = node.Serialize(doc, saveContext);
                 NodeViewModel nodeView = new NodeViewModel(viewModel.CurrentSpaceViewModel, node);
@@ -407,20 +418,28 @@ namespace BeyondDynamo
             }
             if (errorNodeNames.Count > 1)
             {
-                string message = String.Concat(errorNodeNames);
-                Forms.MessageBox.Show(text:message, caption:"Import Warning", icon:MessageBoxIcon.Warning, buttons:MessageBoxButtons.OK);
+                string message = string.Concat(errorNodeNames);
+                Forms.MessageBox.Show(text: message, caption: "Import Warning", icon: MessageBoxIcon.Warning, buttons: MessageBoxButtons.OK);
             }
-            
+
             //Loop over all ConnectorModels from the importedModel
             foreach (ConnectorModel connector in importedModel.Connectors)
             {
-                XmlElement connectorAsXML = connector.Serialize(doc, saveContext);
-                model.CreateModel(connectorAsXML);
+                try
+                {
+                    XmlElement connectorAsXML = connector.Serialize(doc, saveContext);
+                    model.CreateModel(connectorAsXML);
+                }
+                catch
+                {
+
+                }
             }
 
             //Loop over all Notes from the imported Script
             foreach (NoteModel note in importedModel.Notes)
             {
+                note.GUID = Guid.NewGuid();
                 guidList.Add(note.GUID.ToString());
                 XmlElement noteAsXML = note.Serialize(doc, saveContext);
                 model.CreateModel(noteAsXML);
@@ -430,6 +449,7 @@ namespace BeyondDynamo
             foreach (AnnotationViewModel annotationView in importedViewModel.Annotations)
             {
                 AnnotationModel annotation = annotationView.AnnotationModel;
+                annotation.GUID = Guid.NewGuid();
                 guidList.Add(annotation.GUID.ToString());
                 XmlElement annotationAsXML = annotation.Serialize(doc, saveContext);
                 model.CreateModel(annotationAsXML);
@@ -489,7 +509,7 @@ namespace BeyondDynamo
             }
             #endregion
         }
-        
+
         /// <summary>
         /// Changes the Colors of the Selected Groups in the Workspace Model by using a Color Picker UI
         /// </summary>
@@ -820,6 +840,29 @@ namespace BeyondDynamo
                 Shapes.Shape nodeObj = (Shapes.Shape)node.grid.FindName("nodeBackground");
                 nodeObj.Fill = new LinearGradientBrush(Brushes.DodgerBlue.Color, Brushes.MintCream.Color, 45);
             }
+        }
+
+        public static void AutoNodePreviewOff(NodeModel node)
+        {
+            NodeViewModel nodeView = GetNodeViewModel(node);
+            nodeView.PreviewPinned = true;
+            nodeView.ShowExecutionPreview = true;
+            nodeView.ToggleIsVisibleCommand.Execute(node);
+            Utils.LogMessage("Turning Node preview off for " + node.Name);
+        }
+
+        private static NodeViewModel GetNodeViewModel(NodeModel obj)
+        {
+            NodeViewModel nodeViewModel = null;
+            foreach(NodeViewModel nodeView in Utils.DynamoVM.CurrentSpaceViewModel.Nodes)
+            {
+                if(nodeView.NodeModel.GUID == obj.GUID)
+                {
+                    nodeViewModel = nodeView;
+                    break;
+                }
+            }
+            return nodeViewModel;
         }
     }
 }

@@ -166,6 +166,7 @@ namespace BeyondDynamo
             {
                 this.listView.Items.Add(name);
             }
+            this.searchBox.Text = this.searchBox.Text;
         }
     }
 }

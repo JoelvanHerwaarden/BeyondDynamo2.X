@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dynamo.ViewModels;
 using Newtonsoft.Json.Linq;
 using Forms = System.Windows.Forms;
 
@@ -19,6 +20,8 @@ namespace BeyondDynamo
         public int[] customColors { get; set; }
 
         public string playerPath { get; set; }
+
+        public bool hideNodePreview { get; set; }
 
         public BeyondDynamoConfig(string configFilePath)
         {
@@ -41,10 +44,30 @@ namespace BeyondDynamo
                             throw new Exception();
                         }
                     }
-                    catch
+                    catch (Exception exception)
                     {
+                        Utils.LogMessage("Error loading Player path: " + exception.Message);
                         playerPath = null;
                     }
+                    try
+                    {
+                        string hidePreview = config["hideNodePreview"].ToString();
+                        Utils.LogMessage(hidePreview);
+                        if (Boolean.Parse(hidePreview))
+                        {
+                            hideNodePreview = true;
+                        }
+                        else
+                        {
+                            hideNodePreview = false;
+                        }
+                    }
+                    catch(Exception exception)
+                    {
+                        Utils.LogMessage("Error Hide Node Previews: " + exception.Message);
+                        hideNodePreview = false;
+                    }
+                    
                 }
             }
             else
@@ -68,6 +91,7 @@ namespace BeyondDynamo
 
     public class Utils
     {
+        public static DynamoViewModel DynamoVM = null;
         private static string fileName = "BeyondDynamo.Log";
         private static string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Dynamo\BeyondDynamoSettings");
         private static string filePath = Path.Combine(folderPath, fileName);
@@ -96,6 +120,10 @@ namespace BeyondDynamo
                 string time = DateTime.Now.ToString("HH:mm:ss");
                 string msg = time + ": " + message;
                 streamWriter.WriteLine(msg);
+                if(DynamoVM != null)
+                {
+                    DynamoVM.WriteToLogCmd.Execute(msg);
+                }
             }
         }
         public static void OpenLog()

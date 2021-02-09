@@ -26,6 +26,8 @@ using System.Windows.Media;
 using Dynamo.UI.Controls;
 using Dynamo.Configuration;
 using System.Reflection;
+using System.Windows.Interop;
+using System.Runtime.Remoting.Channels;
 
 namespace BeyondDynamo
 {
@@ -134,6 +136,8 @@ namespace BeyondDynamo
         /// </summary>
         private MenuItem RemoveBindingsCurrent;
 
+        private MenuItem PreviewOff;
+
         /// <summary>
         /// About Window Menu Item
         /// </summary>
@@ -200,7 +204,6 @@ namespace BeyondDynamo
         {
             this.config.Save();
         }
-
         public string UniqueId
         {
             get
@@ -238,9 +241,12 @@ namespace BeyondDynamo
         /// <param name="p">Parameters</param>
         public void Loaded(ViewLoadedParams p)
         {
-            Utils.LogMessage("Loading Menu Items Started...");
             BDmenuItem = new MenuItem { Header = "Beyond Dynamo" };
             DynamoViewModel VM = p.DynamoWindow.DataContext as DynamoViewModel;
+
+            Utils.DynamoVM = VM;
+
+            Utils.LogMessage("Loading Menu Items Started...");
 
             Utils.LogMessage("Loading Menu Items: Latest Version Started...");
             LatestVersion = new MenuItem { Header = "New version available! Download now!" };
@@ -255,7 +261,6 @@ namespace BeyondDynamo
             else { Utils.LogMessage("Loading Menu Items: Latest Version is installed"); }
 
             Utils.LogMessage("Loading Menu Items: Latest Version Completed");
-
 
             #region THIS CAN BE RUN ANYTIME
 
@@ -287,6 +292,7 @@ namespace BeyondDynamo
             {
                 Content = "This lets you change the Node Color Settings in your Dynamo nodes in In-Active, Active, Warning and Error state"
             };
+
             BDmenuItem.Items.Add(ChangeNodeColors);
             Utils.LogMessage("Loading Menu Items: Chang Node Colors Completed");
 
@@ -391,12 +397,22 @@ namespace BeyondDynamo
                     }
                 }
             };
-            if (this.config.playerPath != null)
+            Utils.LogMessage("Playerpath = "+this.config.playerPath);
+            if (this.config.playerPath != null | this.config.playerPath != string.Empty)
             {
-                if (Directory.Exists(Path.GetDirectoryName(this.config.playerPath)))
+                try
                 {
-                    BeyondDynamoFunctions.RetrievePlayerFiles(PlayerScripts, VM, this.config.playerPath, extraMenuItems);
+                    if (Directory.Exists(Path.GetDirectoryName(this.config.playerPath)))
+                    {
+                        BeyondDynamoFunctions.RetrievePlayerFiles(PlayerScripts, VM, this.config.playerPath, extraMenuItems);
+                    }
                 }
+                catch(Exception e)
+                {
+                    Utils.LogMessage("Loading Player Path Warning: "+e.Message);
+                    PlayerScripts.Items.Add(SetPlayerPath);
+                }
+                
             }
             else
             {
@@ -552,6 +568,26 @@ namespace BeyondDynamo
                 Content = "Unfreezes all selected nodes and groups"
             };
             BDmenuItem.Items.Add(UnfreezeNodes);
+
+            PreviewOff = new MenuItem { Header = "Automatic Preview Off" };
+            PreviewOff.IsChecked = config.hideNodePreview;
+            PreviewOff.Click +=(sender, args) =>
+            {
+                
+                if (PreviewOff.IsChecked)
+                {
+                    config.hideNodePreview = false;
+                    PreviewOff.IsChecked = false;
+                    VM.CurrentSpace.NodeAdded -= BeyondDynamoFunctions.AutoNodePreviewOff;
+                }
+                else
+                {
+                    config.hideNodePreview = true;
+                    PreviewOff.IsChecked = true;
+                    VM.CurrentSpace.NodeAdded += BeyondDynamoFunctions.AutoNodePreviewOff;
+                }
+            };
+            BDmenuItem.Items.Add(PreviewOff);
             #endregion
 
             AboutItem = new MenuItem { Header = "About Beyond Dynamo"};
@@ -595,5 +631,7 @@ namespace BeyondDynamo
 
             Utils.LogMessage("Loading all Menu Items Completed");
         }
+
+       
     }
 }
