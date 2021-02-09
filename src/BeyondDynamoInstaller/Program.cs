@@ -16,6 +16,8 @@ namespace BeyondDynamoInstaller
         [STAThread]
         static void Main(string[] args)
         {
+            Console.WriteLine("Make sure that Dynamo / Revit / Civil3D / Autocad are all closed! Hit any key to continue");
+            Console.ReadLine();
             Console.WriteLine("Installation Started");
             string version = GitHubRequests.RequestLatestVersion().Result;
             Console.WriteLine(version);
@@ -99,7 +101,6 @@ namespace BeyondDynamoInstaller
             Console.WriteLine("Finished Version Request");
             return result;
         }
-
 
         public async static Task GetAssets()
         {

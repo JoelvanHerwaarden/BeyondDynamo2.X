@@ -22,7 +22,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Dynamo.Wpf.Extensions;
 using Dynamo.Controls;
-using Xceed.Wpf.AvalonDock.Controls;
 using System.Windows.Media;
 using Shapes = System.Windows.Shapes;
 using Dynamo.Utilities;
@@ -830,16 +829,6 @@ namespace BeyondDynamo
             textBox.ShowDialog();
             currentWorkspace.Description = textBox.Text;
             currentWorkspace.HasUnsavedChanges = true;
-        }
-
-        public static void ColorNodes(ViewLoadedParams p)
-        {
-            IEnumerable<NodeView> nodes = p.DynamoWindow.FindVisualChildren<NodeView>();
-            foreach (NodeView node in nodes)
-            {
-                Shapes.Shape nodeObj = (Shapes.Shape)node.grid.FindName("nodeBackground");
-                nodeObj.Fill = new LinearGradientBrush(Brushes.DodgerBlue.Color, Brushes.MintCream.Color, 45);
-            }
         }
 
         public static void AutoNodePreviewOff(NodeModel node)

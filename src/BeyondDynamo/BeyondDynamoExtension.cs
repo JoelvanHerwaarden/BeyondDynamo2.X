@@ -21,7 +21,6 @@ using ProtoCore.AST.AssociativeAST;
 using Dynamo.Wpf.ViewModels.Watch3D;
 using System.Collections.ObjectModel;
 using System.Windows;
-using Xceed.Wpf.AvalonDock.Controls;
 using System.Windows.Media;
 using Dynamo.UI.Controls;
 using Dynamo.Configuration;
@@ -226,7 +225,7 @@ namespace BeyondDynamo
         {
             get
             {
-                return 1.2;
+                return 1.3;
             }
         }
 
@@ -245,7 +244,6 @@ namespace BeyondDynamo
             DynamoViewModel VM = p.DynamoWindow.DataContext as DynamoViewModel;
 
             Utils.DynamoVM = VM;
-
             Utils.LogMessage("Loading Menu Items Started...");
 
             Utils.LogMessage("Loading Menu Items: Latest Version Started...");
