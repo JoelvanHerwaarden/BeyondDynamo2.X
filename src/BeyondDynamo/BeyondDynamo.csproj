@@ -150,6 +150,7 @@
   <ItemGroup>
     <Compile Include="BeyondDynamoConfig.cs" />
     <Compile Include="BeyondDynamoExtension.cs" />
+    <Compile Include="BeyondDynamoToolSpaceView.cs" />
     <Compile Include="BeyondDynamoSearchView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BeyondDynamoFunctions.cs" />
@@ -158,27 +159,27 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Resources\StylesCodeBehind.cs" />
     <Compile Include="UI\About\About.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\About\About.designer.cs">
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\ChangeNodeColor\ChangeNodeColorsViewModel.cs" />
     <Compile Include="UI\ChangeNodeColor\ChangeNodeColorsWindow.xaml.cs" />
+    <Compile Include="UI\RenameInputs\InputsWindow.xaml.cs">
+      <DependentUpon>InputsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ToolSpace\ToolSpaceControl.xaml.cs">
+      <DependentUpon>ToolSpaceControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\SearchView\SearchViewControl.xaml.cs">
       <DependentUpon>SearchViewControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\OrderPlayerInput\OrderPlayerInputWindow.xaml.cs">
       <DependentUpon>OrderPlayerInputWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\RemoveTraceData\RemoveTraceDataViewModel.cs" />
     <Compile Include="UI\RemoveTraceData\RemoveTraceDataWindow.xaml.cs" />
-    <Compile Include="UI\TextBox\TextBoxViewMode.cs" />
-    <Compile Include="UI\TextBox\NoteTextBoxViewModel.cs" />
-    <Compile Include="UI\TextBox\TextBoxWindow.xaml.cs">
-      <DependentUpon>TextBoxWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UI\TextBox\NoteTextBoxWindow.xaml.cs">
       <DependentUpon>NoteTextBoxWindow.xaml</DependentUpon>
     </Compile>
@@ -194,7 +195,19 @@
     <None Include="Resources\BeyondDynamo Banner.png" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Resources\Styles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\ChangeNodeColor\ChangeNodeColorsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\RenameInputs\InputsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\ToolSpace\ToolSpaceControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -207,10 +220,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\RemoveTraceData\RemoveTraceDataWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UI\TextBox\TextBoxWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

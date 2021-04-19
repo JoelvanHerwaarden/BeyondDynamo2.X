@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
@@ -18,6 +20,7 @@ namespace BeyondDynamoInstaller
         {
             Console.WriteLine("Make sure that Dynamo / Revit / Civil3D / Autocad are all closed! Hit any key to continue");
             Console.ReadLine();
+            GitHubRequests.DynamoLocations = GitHubRequests.GetDynamoCorePaths();
             Console.WriteLine("Installation Started");
             string version = GitHubRequests.RequestLatestVersion().Result;
             Console.WriteLine(version);
@@ -38,15 +41,13 @@ namespace BeyondDynamoInstaller
         public static string ReleaseId = null;
         public static Dictionary<string, string> Assets = null;
 
-        public static List<string> DynamoLocations = new List<string>(){
-            @"C:\Program Files\Autodesk\AutoCAD 2020\C3D\Dynamo\Core",
-                @"C:\Program Files\Autodesk\Revit 2020\AddIns\DynamoForRevit",
-                @"C:\Program Files\Autodesk\Revit 2021\AddIns\DynamoForRevit",
-                @"C:\Program Files\Dynamo\Dynamo Core\2",
-                @"C:\Program Files\Dynamo\Dynamo Core\2.1",
-                @"C:\Program Files\Dynamo\Dynamo Core\2.2",
-                @"C:\Program Files\Dynamo\Dynamo Core\2.3",
-                @"C:\Program Files\Dynamo\Dynamo Core\2.4"};
+        public static List<string> DynamoLocations = new List<string>()
+        {
+                @"C:\Program Files\Autodesk",
+                @"C:\Program Files\Dynamo\Dynamo Core",
+                @"D:\Program Files\Autodesk",
+                @"D:\Program Files\Dynamo\Dynamo Core"
+        };
 
         public async static Task<string> RequestLatestVersion()
         {
@@ -180,12 +181,12 @@ namespace BeyondDynamoInstaller
                     try
                     {
                         File.Copy(source, destPath, true);
-                        Console.WriteLine(string.Format("Copied {0} to {1}", Path.GetFileName(source), location));
+                        Console.WriteLine(string.Format("Copied {0} to {1}\n", Path.GetFileName(source), location));
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(string.Format("Failed to Copy {0} to {1}", Path.GetFileName(source), location));
-                        Console.WriteLine(e.Message);
+                        Console.WriteLine(e.Message + "\n");
                     }
 
                     source = filePaths[1];
@@ -194,12 +195,12 @@ namespace BeyondDynamoInstaller
                     try
                     {
                         File.Copy(source, destPath, true);
-                        Console.WriteLine(string.Format("Copied {0} to {1}", Path.GetFileName(source), fileLocation));
+                        Console.WriteLine(string.Format("Copied {0} to {1}\n", Path.GetFileName(source), fileLocation));
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(string.Format("Failed to Copy {0} to {1}", Path.GetFileName(source), location));
-                        Console.WriteLine(e.Message);
+                        Console.WriteLine(e.Message+"\n");
                     }
                 }
             }
@@ -210,6 +211,55 @@ namespace BeyondDynamoInstaller
                 File.Delete(f);
             }
             Console.WriteLine("Finished Deleting Download Files");
+        }
+
+        public static List<string> GetDynamoCorePaths()
+        {
+            List<string> result = new List<string>();
+
+            foreach(string path in DynamoLocations)
+            {
+                if (Directory.Exists(path))
+                {
+                    string[] folders = Directory.GetDirectories(path);
+                    foreach (string folder in folders)
+                    {
+                        if (path.Split('\\').Last() == "Autodesk")
+                        {
+                            if (folder.Split('\\').Last().StartsWith("AutoCAD"))
+                            {
+                                string locationPath = Path.Combine(folder, @"C3D\Dynamo\Core");
+                                if (Directory.Exists(locationPath))
+                                {
+                                    result.Add(locationPath);
+                                }
+                            }
+                            else if(folder.Split('\\').Last().StartsWith("Revit"))
+                            {
+                                string locationPath = Path.Combine(folder, @"AddIns\DynamoForRevit");
+                                if (Directory.Exists(locationPath))
+                                {
+                                    result.Add(locationPath);
+                                }
+                            }
+                        }
+                        else if (path.Split('\\').Last() == "Dynamo Core")
+                        {
+                            if (folder.Split('\\').Last().StartsWith("2"))
+                            {
+                                result.Add(folder);
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach(string p in result)
+            {
+                Console.WriteLine(p);
+            }
+
+            return result;
         }
     }
 }

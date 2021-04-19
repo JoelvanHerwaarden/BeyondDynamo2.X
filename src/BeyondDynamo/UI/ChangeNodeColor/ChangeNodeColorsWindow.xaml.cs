@@ -56,7 +56,7 @@ namespace BeyondDynamo.UI
         public ChangeNodeColorsWindow(System.Windows.ResourceDictionary DynamoNodeSettings, BeyondDynamoConfig beyondDynamoConfig)
         {
             InitializeComponent();
-
+            this.Owner = BeyondDynamo.Utils.DynamoWindow;
             this.config = beyondDynamoConfig;
             this.dynamoNodeSettings = DynamoNodeSettings;
             this._ITitleText = (SolidColorBrush)dynamoNodeSettings["headerForegroundInactive"];

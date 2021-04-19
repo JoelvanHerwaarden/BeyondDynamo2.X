@@ -4,12 +4,19 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:BeyondDynamo"
-             mc:Ignorable="d" Width="223.764" Height="422.2" Background="#FF8C8C8C" Title="Remove Session Trace " MinWidth="275" MinHeight="435" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+             mc:Ignorable="d" Width="223.764" Height="422.2" Background="{StaticResource MainBackground}" Title="Remove Session Trace " MinWidth="275" MinHeight="435" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+	<Window.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="pack://application:,,,/BeyondDynamo;component/Resources/Styles.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Window.Resources>
 	<Grid Name="MainGrid" Margin="0,0,0,-0.4">
 		<ListBox x:Name="FileListBox" Margin="10,123,10.8,59.6" OpacityMask="Black" BorderBrush="Black" SelectionMode="Extended" />
 		<Button x:Name="SelectFolderButton" Content="Select Folder" Margin="10,10,9.8,0" VerticalAlignment="Top" Height="28" Foreground="#FF1F0505" BorderBrush="Black" OpacityMask="Black" Click="SelectFolderButton_Click" Background="White"/>
 		<Button Content="Remove Session Trace Data" Margin="10,0,9.8,10.6" Foreground="#FF1F0505" BorderBrush="Black" OpacityMask="Black" RenderTransformOrigin="0.487,1.654" Click="RemoveTraceDataButton_Click" Height="44" VerticalAlignment="Bottom" Background="White"/>
-		<TextBox x:Name="selectedDirectoryLabel" Height="23" Margin="10,69,12,0" TextWrapping="Wrap" Text="Select Directory with Dynamo scripts" VerticalAlignment="Top" TextChanged="FillFileListBox"/>
+		<TextBox x:Name="selectedDirectoryLabel" Height="23" Margin="10,69,12,0" TextWrapping="Wrap"  Text="Select Directory with Dynamo scripts" VerticalAlignment="Top" TextChanged="FillFileListBox"/>
 		<Label Content="Selected Folder Path:" Margin="10,43,11.8,0" VerticalAlignment="Top"/>
 		<Label Content="Dynamo Files in Selected Folder:" Margin="10,97,11.8,0" VerticalAlignment="Top"/>
 	</Grid>

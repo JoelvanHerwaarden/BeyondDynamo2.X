@@ -70,6 +70,7 @@ namespace BeyondDynamo
         public OrderPlayerInputWindow(Dictionary<string, string> inputNodes, Dictionary<string,string> outputNodes)
         {
             InitializeComponent();
+            Owner = BeyondDynamo.Utils.DynamoWindow;
             this._InputNodes = inputNodes;
             this._OutputNodes = outputNodes;
 

@@ -4,28 +4,31 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:BeyondDynamo"
-             mc:Ignorable="d" Width="289.4" Height="450" Background="#FF8C8C8C" Title="Order Player Nodes" MaxWidth="290" MaxHeight="450" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
-	<Grid Name="MainGrid" Margin="0,0,0,-0.4">
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition/>
-			<ColumnDefinition Width="0*"/>
-		</Grid.ColumnDefinitions>
-		<TabControl Height="351" Margin="10,10,10.2,0" VerticalAlignment="Top" Background="White" BorderBrush="White">
-			<TabItem x:Name="Input_Nodes" Header="Input Nodes" Background="#FFD0D0D0" Margin="-4,-2,-51,-1" BorderBrush="{x:Null}">
-				<Grid Background="White">
-					<ListBox x:Name="InputNodesListBox" Margin="0,0,0.8,26.4" OpacityMask="Black" BorderBrush="#FF4E4E4E" Background="{x:Null}" />
-					<Button x:Name="InputMoveUp" Content="Move Up" Margin="0,297,138.4,-0.6" Click="input_up_click" Background="White"/>
-					<Button x:Name="InputMoveDown" Content="Move Down" Margin="138,297,0.4,-0.6" Click="input_down_click" Background="White"/>
+             mc:Ignorable="d" Width="300" Height="460" Background="{DynamicResource MainBackground}" Title="Order Player Nodes" MaxWidth="300" MaxHeight="460" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+	<Window.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="pack://application:,,,/BeyondDynamo;component/Resources/Styles.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Window.Resources>
+	<Grid Name="MainGrid" Margin="0,0,0,0"> 
+		<TabControl Height="351" Margin="10,10,10.2,0" VerticalAlignment="Top" BorderThickness="0" Background="{StaticResource MainBackground}" >
+			<TabItem x:Name="Input_Nodes" Header="Input Nodes" Margin="0,0,-50,0">
+				<Grid>
+					<ListBox x:Name="InputNodesListBox" Margin="0,0,0,50"/>
+					<Button x:Name="InputMoveUp" Style="{StaticResource RoundButtonFlat}" Content="Move Up" Margin="4,277,146,8" Click="input_up_click" Foreground="DodgerBlue" Background="White"/>
+					<Button x:Name="InputMoveDown"  Style="{StaticResource RoundButtonFlat}" Content="Move Down" Margin="145,277,5,8" Click="input_down_click" Foreground="DodgerBlue" Background="White"/>
 				</Grid>
 			</TabItem>
-			<TabItem x:Name="OutputNodes" Header="Output Nodes" Background="#FFD0D0D0" Margin="49,-2,-93.4,-1" BorderBrush="{x:Null}">
-				<Grid Background="White">
-					<ListBox x:Name="OutputNodesListBox" Margin="0,0,0.8,26.4" OpacityMask="Black" BorderBrush="Black" />
-					<Button x:Name="OutputMoveUp" Content="Move Up" Margin="0,297,138.4,-0.6" Click="output_up_click" Background="White" BorderBrush="Black"/>
-					<Button x:Name="OutputMoveDown" Content="Move Down" Margin="138,297,0.4,-0.6" Click="output_down_click" Background="White" BorderBrush="Black"/>
+			<TabItem x:Name="OutputNodes" Header="Output Nodes" Margin="48,0,-87,0">
+				<Grid>
+					<ListBox x:Name="OutputNodesListBox" Margin="0,0,0,50"/>
+					<Button x:Name="OutputMoveUp" Style="{StaticResource RoundButtonFlat}" Content="Move Up" Margin="4,276,134,7" Click="output_up_click" Foreground="DodgerBlue" Background="White"/>
+					<Button x:Name="OutputMoveDown"  Style="{StaticResource RoundButtonFlat}" Content="Move Down" Margin="133,276,5,7" Click="output_down_click" Foreground="DodgerBlue" Background="White"/>
 				</Grid>
 			</TabItem>
 		</TabControl>
-		<Button Content="OK" Margin="159,366,18.2,20" Click="OK_Click" Background="White"/>
+		<Button Style="{StaticResource RoundButton}" Content="OK" Margin="0,0,10,10.4" Click="OK_Click" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="128" />
 	</Grid>
 </Window>

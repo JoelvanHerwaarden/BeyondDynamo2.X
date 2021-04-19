@@ -27,6 +27,10 @@ using Dynamo.Configuration;
 using System.Reflection;
 using System.Windows.Interop;
 using System.Runtime.Remoting.Channels;
+using DSCore;
+using ProtoCore.Namespace;
+using Dynamo.UI.Commands;
+using Dynamo.Utilities;
 
 namespace BeyondDynamo
 {
@@ -137,6 +141,10 @@ namespace BeyondDynamo
 
         private MenuItem PreviewOff;
 
+        private MenuItem RenamePythonInputs;
+
+        private MenuItem BDToolspace;
+
         /// <summary>
         /// About Window Menu Item
         /// </summary>
@@ -242,7 +250,8 @@ namespace BeyondDynamo
         {
             BDmenuItem = new MenuItem { Header = "Beyond Dynamo" };
             DynamoViewModel VM = p.DynamoWindow.DataContext as DynamoViewModel;
-
+            BeyondDynamo.Utils.DynamoWindow = p.DynamoWindow;
+            
             Utils.DynamoVM = VM;
             Utils.LogMessage("Loading Menu Items Started...");
 
@@ -266,19 +275,14 @@ namespace BeyondDynamo
             ChangeNodeColors = new MenuItem { Header = "Change Node Color" };
             ChangeNodeColors.Click += (sender, args) =>
             {
-                //Make a Viewmodel for the Change Node Color Window
-                var viewModel = new BeyondDynamo.UI.ChangeNodeColorsViewModel(p);
-
                 //Get the current Node Color Template
                 System.Windows.ResourceDictionary dynamoUI = Dynamo.UI.SharedDictionaryManager.DynamoColorsAndBrushesDictionary;
 
                 //Initiate a new Change Node Color Window
                 ChangeNodeColorsWindow colorWindow = new ChangeNodeColorsWindow(dynamoUI, config)
                 {
-                    // Set the data context for the main grid in the window.
-                    MainGrid = { DataContext = viewModel },
                     // Set the owner of the window to the Dynamo window.
-                    Owner = p.DynamoWindow,
+                    Owner = BeyondDynamo.Utils.DynamoWindow
                 };
                 colorWindow.Left = colorWindow.Owner.Left + 400;
                 colorWindow.Top = colorWindow.Owner.Top + 200;
@@ -300,12 +304,10 @@ namespace BeyondDynamo
             BatchRemoveTraceData.Click += (sender, args) =>
             {
                 //Make a ViewModel for the Remove Trace Data window
-                var viewModel = new RemoveTraceDataViewModel(p);
 
                 //Initiate a new Remove Trace Data window
                 RemoveTraceDataWindow window = new RemoveTraceDataWindow()
                 {
-                    MainGrid = { DataContext = viewModel },
                     Owner = p.DynamoWindow,
                     viewModel = VM
                 };
@@ -514,6 +516,14 @@ namespace BeyondDynamo
             };
             BDmenuItem.Items.Add(ScriptImport);
 
+            RenamePythonInputs = new MenuItem { Header = "Rename Python Inputs" };
+            RenamePythonInputs.Click += (sender, args) =>
+            {
+                BeyondDynamoFunctions.RenamePythonInputs();
+            };
+            RenamePythonInputs.ToolTip = new ToolTip() { Content = "Rename the Input names and the Output name for a Python Node to make them more descriptive" };
+            BDmenuItem.Items.Add(RenamePythonInputs);
+
             SearchWorkspace = new MenuItem { Header = "Search Workspace" };
             SearchWorkspace.Click += (sender, args) =>
             {
@@ -567,11 +577,28 @@ namespace BeyondDynamo
             };
             BDmenuItem.Items.Add(UnfreezeNodes);
 
+            BDToolspace = new MenuItem { Header = "Beyond Dynamo Toolspace" };
+            BDToolspace.Click += (sender, args) =>
+            {
+                BeyondDynamoToolSpaceView panelView = new BeyondDynamoToolSpaceView();
+                ToolSpaceControl toolspacecontrol = new ToolSpaceControl();
+                p.AddToExtensionsSideBar(panelView, toolspacecontrol);
+            };
+            BDToolspace.ToolTip = new ToolTip()
+            {
+                Content = "A Toolspace panel with the most used Beyond Dynamo at your disposal!"
+            };
+            BDmenuItem.Items.Add(BDToolspace);
+
             PreviewOff = new MenuItem { Header = "Automatic Preview Off" };
             PreviewOff.IsChecked = config.hideNodePreview;
+            BeyondDynamo.Utils.AutomaticHide = PreviewOff.IsChecked;
+            if (PreviewOff.IsChecked)
+            {
+                VM.CurrentSpace.NodeAdded += BeyondDynamoFunctions.AutoNodePreviewOff;
+            }
             PreviewOff.Click +=(sender, args) =>
             {
-                
                 if (PreviewOff.IsChecked)
                 {
                     config.hideNodePreview = false;
@@ -599,8 +626,10 @@ namespace BeyondDynamo
             {
                 Content = "Shows all the information about Beyond Dynamo"
             };
+
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(new Separator());
+
             BDmenuItem.Items.Add(AboutItem);
             OpenLog = new MenuItem() { Header = "Open Beyond Dynamo Log" };
             OpenLog.Click += (sender, args) =>
@@ -608,28 +637,15 @@ namespace BeyondDynamo
                 Utils.OpenLog();
             };
             OpenLog.ToolTip = new ToolTip() { Content = "Opens the Log file for Beyond Dynamo. \nThis is where all the activities are logged for Beyond Dynamo." };
-            BDmenuItem.Items.Add(OpenLog);
+            //BDmenuItem.Items.Add(OpenLog);
 
             p.dynamoMenu.Items.Add(BDmenuItem);
 
             #region ADD GRAPH DESCRIPTION
 
-            MenuItem editDescription = new MenuItem() { Header = "Edit Workspace Description" };
-            editDescription.Click += (sender, args) =>
-            {
-                if (VM.Workspaces.Count < 1)
-                {
-                    Forms.MessageBox.Show("No Workspace found", "Beyond Dynamo");
-                    return;
-                }
-                BeyondDynamoFunctions.ChangeDescription(VM.CurrentSpace);
-            };
-            p.AddMenuItem(MenuBarType.File, editDescription, 3);
             #endregion ADD GRAPH DESCRIPTION
 
             Utils.LogMessage("Loading all Menu Items Completed");
         }
-
-       
     }
 }

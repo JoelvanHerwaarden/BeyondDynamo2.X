@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Dynamo.ViewModels;
 using Newtonsoft.Json.Linq;
 using Forms = System.Windows.Forms;
@@ -91,10 +92,13 @@ namespace BeyondDynamo
 
     public class Utils
     {
+        public static Window DynamoWindow = null;
         public static DynamoViewModel DynamoVM = null;
+        public static bool AutomaticHide = false;
         private static string fileName = "BeyondDynamo.Log";
         private static string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Dynamo\BeyondDynamoSettings");
         private static string filePath = Path.Combine(folderPath, fileName);
+
         public static void SetupLog(string FileName = null)
         {
             if (!Directory.Exists(folderPath))

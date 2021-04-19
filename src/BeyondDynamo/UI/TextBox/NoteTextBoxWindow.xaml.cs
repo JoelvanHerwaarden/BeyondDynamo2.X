@@ -21,23 +21,27 @@ namespace BeyondDynamo
     /// </summary>
     public partial class NoteTextBoxWindow : Window
     {
-        private NoteModel note { get; set; }
+        private NoteModel Note { get; set; }
 
         /// <summary>
         /// The Typed Text in the Test Editor Window
         /// </summary>
-        public string text { get; set; }
+        public string InitialText { get; set; }
+
+        private bool Accepted { get; set; }
 
         /// <summary>
         /// The Text Editor Window
         /// </summary>
         /// <param name="startText"></param>
-        public NoteTextBoxWindow(NoteModel Note)
+        public NoteTextBoxWindow(NoteModel note)
         {
-            this.note = Note;
-            text = Note.Text;
+            this.Note = note;
+            InitialText = Note.Text;
             InitializeComponent();
-            textBox.Text = text;
+            this.Owner = Utils.DynamoWindow;
+            textBox.Text = InitialText;
+            Accepted = false;
         }
 
         /// <summary>
@@ -47,12 +51,21 @@ namespace BeyondDynamo
         /// <param name="e"></param>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            this.Accepted = true;
             this.Close();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            note.Text = this.textBox.Text;
+            Note.Text = this.textBox.Text;
+        }
+
+        private void Change_Text_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!Accepted)
+            {
+                this.Note.Text = InitialText;
+            }
         }
     }
 }

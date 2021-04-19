@@ -26,6 +26,9 @@ using System.Windows.Media;
 using Shapes = System.Windows.Shapes;
 using Dynamo.Utilities;
 using DSCore;
+using NUnit.Framework;
+using System.Linq;
+using BeyondDynamo.UI;
 
 namespace BeyondDynamo
 {
@@ -546,7 +549,6 @@ namespace BeyondDynamo
             {
                 System.Windows.MessageBox.Show("No Groups selected", "Beyond Dynamo");
             }
-
             return config;
         }
 
@@ -627,6 +629,61 @@ namespace BeyondDynamo
                 }
             }
             KeepSelection(model);
+        }
+
+        /// <summary>
+        /// Opens a Text editor window for each selected Note
+        /// </summary>
+        /// <param name="model"></param>
+        public static List<NodeModel> GetSelectedNodes(WorkspaceModel workspaceModel)
+        {
+
+            //Check if there are any Notes selected
+            List<NodeModel> selectedNodes = new List<NodeModel>();
+            foreach (NodeModel node in workspaceModel.Nodes)
+            {
+                if (node.IsSelected)
+                {
+                    selectedNodes.Add(node);
+                }
+            }
+
+            if (selectedNodes.Count == 0)
+            {
+                System.Windows.MessageBox.Show("No Nodes Selected", "Beyond Dynamo");
+                return null;
+            }
+            else
+            {
+                return selectedNodes;
+            }
+        }
+        /// <summary>
+        /// Opens a Text editor window for each selected Note
+        /// </summary>
+        /// <param name="model"></param>
+        public static List<NodeViewModel> GetSelectedNodeViewModels(WorkspaceViewModel workspaceModel)
+        {
+
+            //Check if there are any Notes selected
+            List<NodeViewModel> selectedNodes = new List<NodeViewModel>();
+            foreach (NodeViewModel node in workspaceModel.Nodes)
+            {
+                if (node.IsSelected)
+                {
+                    selectedNodes.Add(node);
+                }
+            }
+
+            if (selectedNodes.Count == 0)
+            {
+                System.Windows.MessageBox.Show("No Nodes Selected", "Beyond Dynamo");
+                return null;
+            }
+            else
+            {
+                return selectedNodes;
+            }
         }
 
         /// <summary>
@@ -716,6 +773,25 @@ namespace BeyondDynamo
             orderPlayerInput.dynamoVersion = "XML";
             orderPlayerInput.dynamoGraphPath = DynamoFilepath;
             orderPlayerInput.Show();
+        }
+
+        public static void ChangePreviewStateOfSelectedNodes(bool hide)
+        {
+            WorkspaceModel currentWorkspace = BeyondDynamo.Utils.DynamoVM.CurrentSpace;
+            foreach(NodeModel node in currentWorkspace.Nodes)
+            {
+                if (node.IsSelected)
+                {
+                    if (hide)
+                    {
+                        AutoNodePreview(node);
+                    }
+                    else
+                    {
+                        AutoNodePreview(node, hide);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -818,24 +894,55 @@ namespace BeyondDynamo
             }
         }
 
-        /// <summary>
-        /// Changes the Description of a Dynamo Graph
-        /// </summary>
-        /// <param name="currentWorkspace"></param>
-        public static void ChangeDescription(WorkspaceModel currentWorkspace)
+        public static void RenamePythonInputs()
         {
-            string text = currentWorkspace.Description;
-            TextBoxWindow textBox = new TextBoxWindow(text);
-            textBox.ShowDialog();
-            currentWorkspace.Description = textBox.Text;
-            currentWorkspace.HasUnsavedChanges = true;
+            DynamoViewModel VM = BeyondDynamo.Utils.DynamoVM;
+            //Check if we are in an active graph
+            if (VM.Workspaces.Count < 1)
+            {
+                Forms.MessageBox.Show("This command can only run in an active graph.\nPlease open a Dynamo Graph to use this function.", "Beyond Dynamo");
+                return;
+            }
+            WorkspaceViewModel currentWorkspaceView = VM.CurrentSpaceViewModel;
+
+            WorkspaceModel currentWorkspace = currentWorkspaceView.Model;
+            int selected = 0;
+            foreach (NodeViewModel nodeView in currentWorkspaceView.Nodes)
+            {
+                if (nodeView.NodeModel.IsSelected)
+                {
+                    string type = nodeView.NodeModel.GetType().Name;
+                    if(type == "PythonNode" | type == "PythonStringNode")
+                    {
+                        InputsWindow inputsWindow = new InputsWindow(nodeView);
+                        inputsWindow.Show();
+                        selected += 1;
+                    }
+                }
+            }
+            if (selected == 0)
+            {
+                MessageBox.Show("No Python Node Selected\nSelect a Python node to use this function");
+            }
         }
 
+        public static void AutoNodePreview(NodeModel node, bool hide = true)
+        {
+            NodeViewModel nodeView = GetNodeViewModel(node);
+            Forms.MessageBox.Show(node.ShouldDisplayPreview.ToString());
+            if (nodeView.ShowExecutionPreview && hide)
+            {
+                nodeView.ToggleIsVisibleCommand.Execute(node);
+            }
+            else if(!nodeView.ShowExecutionPreview && !hide)
+            {
+                nodeView.ToggleIsVisibleCommand.Execute(node);
+            }
+            Utils.LogMessage("Turning Node preview off for " + node.Name);
+        }
         public static void AutoNodePreviewOff(NodeModel node)
         {
             NodeViewModel nodeView = GetNodeViewModel(node);
-            nodeView.PreviewPinned = true;
-            nodeView.ShowExecutionPreview = true;
             nodeView.ToggleIsVisibleCommand.Execute(node);
             Utils.LogMessage("Turning Node preview off for " + node.Name);
         }

@@ -4,7 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:BeyondDynamo.UI"
-             mc:Ignorable="d" Height="293.054" Width="416.664" Background="#FF8C8C8C" ResizeMode="NoResize" Title="Change Node Colors">
+             mc:Ignorable="d" Height="293.054" Width="416.664" Background="{StaticResource MainBackground}"  ResizeMode="NoResize" Title="Change Node Colors">
+	<Window.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="pack://application:,,,/BeyondDynamo;component/Resources/Styles.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Window.Resources>
     <Grid Name="MainGrid" Margin="0,0,0,0" Background="#FF8C8C8C">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="13*"/>

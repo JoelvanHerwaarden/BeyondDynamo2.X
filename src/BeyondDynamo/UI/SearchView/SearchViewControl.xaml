@@ -4,8 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d" Height="354.584" Width="441.903" Foreground="Black">
-	<Grid Name="MainGrid" Margin="0,0,0,-1" Background="#FF8C8C8C">
-		<TextBox x:Name="searchBox" Height="23" Margin="10,10,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextChanged="SearchBox_TextChanged" BorderBrush="Black"/>
-		<ListBox x:Name="listView" Margin="10,38,10,47" SelectionChanged="ListView_SelectionChanged" BorderBrush="Black"/>
+	<ContentControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="pack://application:,,,/BeyondDynamo;component/Resources/Styles.xaml"/>
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</ContentControl.Resources>
+	<Grid Name="MainGrid" Margin="0,0,0,-1" Background="{StaticResource MainBackground}">
+		<Label Content="Type to search for specific Node Names" FontSize="14" FontWeight="DemiBold" Foreground="{StaticResource MainTextColor}" Margin="10"/>
+		<TextBox x:Name="searchBox" Height="23" Margin="10,47,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Foreground="Gray" TextChanged="SearchBox_TextChanged" BorderBrush="LightBlue"/>
+		<ListBox x:Name="listView" Margin="10,75,10,47" FontSize="14" SelectionChanged="ListView_SelectionChanged" Foreground="{StaticResource MainTextColor}" BorderBrush="LightBlue"/>
 	</Grid>
 </ContentControl>
