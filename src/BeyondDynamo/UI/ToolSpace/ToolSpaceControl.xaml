@@ -10,8 +10,6 @@
 				<ResourceDictionary Source="pack://application:,,,/BeyondDynamo;component/Resources/Styles.xaml"/>
 				<ResourceDictionary>
 					<Style x:Key="FilePathButton" TargetType="Button">
-						<Setter Property="Background" Value="Yellow"/>
-						<Setter Property="Foreground" Value="Black"/>
 						<Setter Property="Height" Value="40"/>
 						<Setter Property="FontWeight" Value="Light"/>
 						<Setter Property="FontSize" Value="16"/>
@@ -72,6 +70,31 @@
 						<EventSetter Event="MouseEnter" Handler="Button_MouseEnter"/>
 						<EventSetter Event="MouseLeave" Handler="Button_MouseLeave"/>
 					</Style>
+					<Style x:Key="WarningButton" TargetType="Button">
+						<Setter Property="Background" Value="Yellow"/>
+						<Setter Property="Foreground" Value="Yellow"/>
+						<Setter Property="Height" Value="60"/>
+						<Setter Property="FontWeight" Value="DemiBold"/>
+						<Setter Property="FontSize" Value="12"/>
+						<Setter Property="Margin" Value="10"/>
+						<Setter Property="Template">
+							<Setter.Value>
+								<ControlTemplate TargetType="Button">
+									<Grid >
+										<Border CornerRadius="10" Background="{TemplateBinding Background}" BorderThickness="0" BorderBrush="#1e90ff">
+											<Border.Effect>
+												<DropShadowEffect BlurRadius="10" Color="Gray" Opacity="100" Direction="270" ShadowDepth="2"/>
+											</Border.Effect>
+											<ContentPresenter HorizontalAlignment="Center" Margin="10" VerticalAlignment="Center"/>
+										</Border>
+										<TextBlock Text="{TemplateBinding Content}" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Black" FontSize="{TemplateBinding FontSize}" TextWrapping="Wrap"/>
+									</Grid>
+								</ControlTemplate>
+							</Setter.Value>
+						</Setter>
+						<EventSetter Event="MouseEnter" Handler="Button_MouseEnter"/>
+						<EventSetter Event="MouseLeave" Handler="Button_MouseLeave"/>
+					</Style>
 				</ResourceDictionary>
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
@@ -79,7 +102,7 @@
 	</ContentControl.Resources>
 	<Grid Name="MainGrid" Margin="0,0,0,0" Background="{StaticResource MainBackground}">
 
-		<ScrollViewer Grid.ColumnSpan="2">
+		<ScrollViewer>
 			<StackPanel>
 				<WrapPanel>
 					<Button Style="{StaticResource RoundColorButton}" Foreground="#FFFFFF" Background="#FFBB87C6" Click="ColorButton_Click" ToolTip="Change the color of the selected groups"/>
@@ -110,9 +133,10 @@
 						</Button.Background>
 					</Button>
 				</WrapPanel>
-				<Button x:Name="ImportDYNGraphButton" ToolTip="Import another Dynamo graph or code snippet into the current Graph" Content="Import Dynamo Graph" FontWeight="DemiBold" Style="{StaticResource FilePathButton}" Grid.Row="1" Margin="5,10,5,10" Foreground="DarkSlateGray" FontSize="15" Grid.ColumnSpan="2" Click="ImportDYNGraphButton_Click"/>
+				<Button x:Name="ImportDYNGraphButton" ToolTip="Import another Dynamo graph or code snippet into the current Graph" Content="Import Dynamo Graph" FontWeight="DemiBold" Style="{StaticResource FilePathButton}" Grid.Row="1" Margin="5,10,5,10" Foreground="Black" Background="Orange" FontSize="15" Grid.ColumnSpan="2" Click="ImportDYNGraphButton_Click"/>
 				<Grid>
 					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*"/>
 						<ColumnDefinition Width="*"/>
 						<ColumnDefinition Width="*"/>
 					</Grid.ColumnDefinitions>
@@ -123,49 +147,28 @@
 							</Canvas>
 						</Viewbox>
 					</Button>
-					<Button x:Name="UnFreezeButton" ToolTip="UnFreeze the selected nodes" Grid.Column="1" Style="{DynamicResource RectangleButton}" Background="Orange" Height="100" Margin="5" Click="UnFreezeButton_Click">
-						<Viewbox Width="50">
-							<Canvas Width="24" Height="24">
-								<Path Fill="DarkSlateGray" Data="M3.55,18.54L4.96,19.95L6.76,18.16L5.34,16.74M11,22.45C11.32,22.45 13,22.45 13,22.45V19.5H11M12,5.5A6,6 0 0,0 6,11.5A6,6 0 0,0 12,17.5A6,6 0 0,0 18,11.5C18,8.18 15.31,5.5 12,5.5M20,12.5H23V10.5H20M17.24,18.16L19.04,19.95L20.45,18.54L18.66,16.74M20.45,4.46L19.04,3.05L17.24,4.84L18.66,6.26M13,0.55H11V3.5H13M4,10.5H1V12.5H4M6.76,4.84L4.96,3.05L3.55,4.46L5.34,6.26L6.76,4.84Z" />
-							</Canvas>
-						</Viewbox>
-					</Button>
-				</Grid>
-				<Grid>
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="*"/>
-						<ColumnDefinition Width="*"/>
-					</Grid.ColumnDefinitions>
-
-					<Button x:Name="onPreview" Grid.Column="0" Style="{DynamicResource RectangleButton}" ToolTip="Turn the preview on for the selected nodes" Background="LightGreen" Height="100" Margin="5" Click="onPreview_Click">
-						<Viewbox Width="48" Height="48">
-							<Canvas Width="24" Height="24">
-								<Path Fill="Gray" Data="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
-							</Canvas>
-						</Viewbox>
-					</Button>
-					<Button x:Name="previewoff" Grid.Column="1" Style="{DynamicResource RectangleButton}" ToolTip="Turn the preview off for the selected nodes" Background="Gray" Height="100" Margin="5" Click="previewoff_Click">
+					<Button x:Name="previewoff" Grid.Column="1" Style="{DynamicResource RectangleButton}" ToolTip="Turn the preview off for the selected nodes" Background="Gray" Height="100" Margin="5" Click="PreviewButton_Click">
 						<Viewbox x:Name="offPreview" Width="48" Height="48">
 							<Canvas Width="24" Height="24">
 								<Path Fill="LightGreen" Data="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L4.28,6.55L4.73,7C3.08,8.3 1.78,10 1,12C2.73,16.39 7,19.5 12,19.5C13.55,19.5 15.03,19.2 16.38,18.66L16.81,19.08L19.73,22L21,20.73L3.27,3M12,7A5,5 0 0,1 17,12C17,12.64 16.87,13.26 16.64,13.82L19.57,16.75C21.07,15.5 22.27,13.86 23,12C21.27,7.61 17,4.5 12,4.5C10.6,4.5 9.26,4.75 8,5.2L10.17,7.35C10.74,7.13 11.35,7 12,7Z" />
 							</Canvas>
 						</Viewbox>
 					</Button>
-				</Grid>
-				<Grid>
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="*"/>
-						<ColumnDefinition Width="*"/>
-					</Grid.ColumnDefinitions>
 
-					<Button x:Name="PythonRenameButton" Grid.Column="0" ToolTip="Rename the Python Inputs and Output for the selected Python nodes" Grid.Row="3" Style="{DynamicResource RectangleButton}" Background="Yellow" Height="100" Margin="5" Click="PythonRenameButton_Click">
+					<Button x:Name="PythonRenameButton" Grid.Column="3" ToolTip="Rename the Python Inputs and Output for the selected Python nodes" Grid.Row="3" Style="{DynamicResource RectangleButton}" Background="Green" Height="100" Margin="5" Click="PythonRenameButton_Click">
 						<Viewbox Width="50" Height="50">
 							<Canvas Width="24" Height="24">
-								<Path Fill="Black" Data="M19.14,7.5A2.86,2.86 0 0,1 22,10.36V14.14A2.86,2.86 0 0,1 19.14,17H12C12,17.39 12.32,17.96 12.71,17.96H17V19.64A2.86,2.86 0 0,1 14.14,22.5H9.86A2.86,2.86 0 0,1 7,19.64V15.89C7,14.31 8.28,13.04 9.86,13.04H15.11C16.69,13.04 17.96,11.76 17.96,10.18V7.5H19.14M14.86,19.29C14.46,19.29 14.14,19.59 14.14,20.18C14.14,20.77 14.46,20.89 14.86,20.89A0.71,0.71 0 0,0 15.57,20.18C15.57,19.59 15.25,19.29 14.86,19.29M4.86,17.5C3.28,17.5 2,16.22 2,14.64V10.86C2,9.28 3.28,8 4.86,8H12C12,7.61 11.68,7.04 11.29,7.04H7V5.36C7,3.78 8.28,2.5 9.86,2.5H14.14C15.72,2.5 17,3.78 17,5.36V9.11C17,10.69 15.72,11.96 14.14,11.96H8.89C7.31,11.96 6.04,13.24 6.04,14.82V17.5H4.86M9.14,5.71C9.54,5.71 9.86,5.41 9.86,4.82C9.86,4.23 9.54,4.11 9.14,4.11C8.75,4.11 8.43,4.23 8.43,4.82C8.43,5.41 8.75,5.71 9.14,5.71Z" />
+								<Path Fill="GreenYellow" Data="M19.14,7.5A2.86,2.86 0 0,1 22,10.36V14.14A2.86,2.86 0 0,1 19.14,17H12C12,17.39 12.32,17.96 12.71,17.96H17V19.64A2.86,2.86 0 0,1 14.14,22.5H9.86A2.86,2.86 0 0,1 7,19.64V15.89C7,14.31 8.28,13.04 9.86,13.04H15.11C16.69,13.04 17.96,11.76 17.96,10.18V7.5H19.14M14.86,19.29C14.46,19.29 14.14,19.59 14.14,20.18C14.14,20.77 14.46,20.89 14.86,20.89A0.71,0.71 0 0,0 15.57,20.18C15.57,19.59 15.25,19.29 14.86,19.29M4.86,17.5C3.28,17.5 2,16.22 2,14.64V10.86C2,9.28 3.28,8 4.86,8H12C12,7.61 11.68,7.04 11.29,7.04H7V5.36C7,3.78 8.28,2.5 9.86,2.5H14.14C15.72,2.5 17,3.78 17,5.36V9.11C17,10.69 15.72,11.96 14.14,11.96H8.89C7.31,11.96 6.04,13.24 6.04,14.82V17.5H4.86M9.14,5.71C9.54,5.71 9.86,5.41 9.86,4.82C9.86,4.23 9.54,4.11 9.14,4.11C8.75,4.11 8.43,4.23 8.43,4.82C8.43,5.41 8.75,5.71 9.14,5.71Z" />
 							</Canvas>
 						</Viewbox>
 					</Button>
 				</Grid>
+				<ScrollViewer Unloaded="ScrollViewer_Unloaded">
+					<StackPanel x:Name="WarningStacker">
+						<Button Content="WarningButton" Style="{StaticResource WarningButton}"/>
+					</StackPanel>
+				</ScrollViewer>
+
 
 			</StackPanel>
 		</ScrollViewer>

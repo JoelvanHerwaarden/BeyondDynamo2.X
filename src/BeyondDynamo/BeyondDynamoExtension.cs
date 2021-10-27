@@ -31,6 +31,7 @@ using DSCore;
 using ProtoCore.Namespace;
 using Dynamo.UI.Commands;
 using Dynamo.Utilities;
+using System.Windows.Input;
 
 namespace BeyondDynamo
 {
@@ -109,10 +110,11 @@ namespace BeyondDynamo
         /// </summary>
         private MenuItem FreezeNodes;
 
+
         /// <summary>
-        /// Unfreeze Multiple Nodes Menu Item
+        /// Freeze Multiple Nodes Menu Item
         /// </summary>
-        private MenuItem UnfreezeNodes;
+        private MenuItem PreviewNodes;
 
         /// <summary>
         /// Order Player Inputs Menu Item
@@ -139,7 +141,7 @@ namespace BeyondDynamo
         /// </summary>
         private MenuItem RemoveBindingsCurrent;
 
-        private MenuItem PreviewOff;
+        private MenuItem AutomaticPreviewOff;
 
         private MenuItem RenamePythonInputs;
 
@@ -251,7 +253,7 @@ namespace BeyondDynamo
             BDmenuItem = new MenuItem { Header = "Beyond Dynamo" };
             DynamoViewModel VM = p.DynamoWindow.DataContext as DynamoViewModel;
             BeyondDynamo.Utils.DynamoWindow = p.DynamoWindow;
-            
+
             Utils.DynamoVM = VM;
             Utils.LogMessage("Loading Menu Items Started...");
 
@@ -295,10 +297,6 @@ namespace BeyondDynamo
                 Content = "This lets you change the Node Color Settings in your Dynamo nodes in In-Active, Active, Warning and Error state"
             };
 
-            BDmenuItem.Items.Add(ChangeNodeColors);
-            Utils.LogMessage("Loading Menu Items: Chang Node Colors Completed");
-
-
             Utils.LogMessage("Loading Menu Items: Batch Remove Trace Data Started...");
             BatchRemoveTraceData = new MenuItem { Header = "Remove Session Trace Data from Dynamo Graphs" };
             BatchRemoveTraceData.Click += (sender, args) =>
@@ -324,8 +322,6 @@ namespace BeyondDynamo
                 "\nSession Trace Data / Bindings is the trace data binding with the current Revit model and elements." +
                 "\nIt can slow your scripts down if you run them because it first tries the regain the last session in which it was used."
             };
-            BDmenuItem.Items.Add(BatchRemoveTraceData);
-            Utils.LogMessage("Loading Menu Items: Batch Remove Trace Data Completed");
 
             Utils.LogMessage("Loading Menu Items: Order Player Nodes Started...");
             OrderPlayerInput = new MenuItem { Header = "Order Input/Output Nodes" };
@@ -367,8 +363,6 @@ namespace BeyondDynamo
                 "\n Only Watch nodes which are marked as Output are displayed in the Dynamo Player. " +
                 "\nOther nodes will show up in Refinery"
             };
-            BDmenuItem.Items.Add(OrderPlayerInput);
-            Utils.LogMessage("Loading Menu Items: Order Player Nodes Completed");
 
             Utils.LogMessage("Loading Menu Items: Player Scripts Started...");
             PlayerScripts = new MenuItem { Header = "Player Graphs" };
@@ -418,6 +412,13 @@ namespace BeyondDynamo
             {
                 PlayerScripts.Items.Add(SetPlayerPath);
             }
+
+            //BDmenuItem.Items.Add(ChangeNodeColors);
+            //Utils.LogMessage("Loading Menu Items: Chang Node Colors Completed");
+            //BDmenuItem.Items.Add(BatchRemoveTraceData);
+            //Utils.LogMessage("Loading Menu Items: Batch Remove Trace Data Completed");
+            BDmenuItem.Items.Add(OrderPlayerInput);
+            Utils.LogMessage("Loading Menu Items: Order Player Nodes Completed");
             BDmenuItem.Items.Add(PlayerScripts);
             Utils.LogMessage("Loading Menu Items: Player Scripts Completed");
 
@@ -467,7 +468,6 @@ namespace BeyondDynamo
             {
                 Content = "Removes the Bindings to the last Session in Revit. \nIt will keep the Elements placed in the last Run"
             };
-            BDmenuItem.Items.Add(RemoveBindingsCurrent);
 
             DeselectNodeLabels = new MenuItem { Header = "Deselect Node Data" };
             DeselectNodeLabels.Click += (sender, args) =>
@@ -488,7 +488,6 @@ namespace BeyondDynamo
                 Content = "If you have selected something in the preview bubble of a Node, it will be selected in the Dynamo background.\n\n" +
                 "This deselects all the labels in the preview."
             };
-            BDmenuItem.Items.Add(DeselectNodeLabels);
 
             GroupColor = new MenuItem { Header = "Change Group Color" };
             GroupColor.Click += (sender, args) =>
@@ -499,7 +498,6 @@ namespace BeyondDynamo
             {
                 Content = "Gives a Color Picker Dialog in which you can select a color to use for the selected groups"
             };
-            BDmenuItem.Items.Add(GroupColor);
 
             ScriptImport = new MenuItem { Header = "Import From Graph" };
             ScriptImport.Click += (sender, args) =>
@@ -514,7 +512,6 @@ namespace BeyondDynamo
             {
                 Content = "This lets you select a Dynamo File and it will import the contents of that script inside the current workspace"
             };
-            BDmenuItem.Items.Add(ScriptImport);
 
             RenamePythonInputs = new MenuItem { Header = "Rename Python Inputs" };
             RenamePythonInputs.Click += (sender, args) =>
@@ -522,7 +519,6 @@ namespace BeyondDynamo
                 BeyondDynamoFunctions.RenamePythonInputs();
             };
             RenamePythonInputs.ToolTip = new ToolTip() { Content = "Rename the Input names and the Output name for a Python Node to make them more descriptive" };
-            BDmenuItem.Items.Add(RenamePythonInputs);
 
             SearchWorkspace = new MenuItem { Header = "Search Workspace" };
             SearchWorkspace.Click += (sender, args) =>
@@ -535,7 +531,6 @@ namespace BeyondDynamo
             {
                 Content = "This will let you search for Nodes in the Current workspace"
             };
-            BDmenuItem.Items.Add(SearchWorkspace);
 
             EditNotes = new MenuItem { Header = "Edit Note Text" };
             EditNotes.Click += (sender, args) =>
@@ -553,29 +548,38 @@ namespace BeyondDynamo
             {
                 Content = "A Resizable window to edit selected Text Notes"
             };
-            BDmenuItem.Items.Add(EditNotes);
 
             FreezeNodes = new MenuItem { Header = "Freeze Multiple Nodes" };
+            FreezeNodes.InputGestureText = "Ctrl+E";
+            FreezeNodesCommand command = new FreezeNodesCommand();
             FreezeNodes.Click += (sender, args) =>
             {
-                BeyondDynamoFunctions.FreezeNodes(VM.Model);
+                FreezeNodesCommand.FreezeNodes();
             };
+            Utils.DynamoWindow.CommandBindings.Add(new CommandBinding(command));
+            KeyGesture shortkey = new KeyGesture( Key.E, System.Windows.Input.ModifierKeys.Control); ;
+            Utils.DynamoWindow.InputBindings.Add(new InputBinding(command, shortkey));
             FreezeNodes.ToolTip = new ToolTip()
             {
-                Content = "Freezes all selected nodes and groups"
+                Content = "Freezes or Unfreezes all selected nodes and groups"
             };
-            BDmenuItem.Items.Add(FreezeNodes);
 
-            UnfreezeNodes = new MenuItem { Header = "Unfreeze Multiple Nodes" };
-            UnfreezeNodes.Click += (sender, args) =>
+
+            PreviewNodes = new MenuItem { Header = "Preview Multiple Nodes" };
+            PreviewNodes.InputGestureText = "Ctrl+Q";
+            PreviewNodesCommand previewCommand = new PreviewNodesCommand();
+            PreviewNodes.Click += (sender, args) =>
             {
-                BeyondDynamoFunctions.UnfreezeNodes(VM.Model);
+                PreviewNodesCommand.PreviewNodes();
             };
-            UnfreezeNodes.ToolTip = new ToolTip()
+            Utils.DynamoWindow.CommandBindings.Add(new CommandBinding(previewCommand));
+            KeyGesture previewShortKey = new KeyGesture(Key.Q, System.Windows.Input.ModifierKeys.Control); ;
+            Utils.DynamoWindow.InputBindings.Add(new InputBinding(previewCommand, previewShortKey));
+            PreviewNodes.ToolTip = new ToolTip()
             {
-                Content = "Unfreezes all selected nodes and groups"
+                Content = "Toggle the preview on and off for multiple nodes"
             };
-            BDmenuItem.Items.Add(UnfreezeNodes);
+
 
             BDToolspace = new MenuItem { Header = "Beyond Dynamo Toolspace" };
             BDToolspace.Click += (sender, args) =>
@@ -588,34 +592,49 @@ namespace BeyondDynamo
             {
                 Content = "A Toolspace panel with the most used Beyond Dynamo at your disposal!"
             };
-            BDmenuItem.Items.Add(BDToolspace);
 
-            PreviewOff = new MenuItem { Header = "Automatic Preview Off" };
-            PreviewOff.IsChecked = config.hideNodePreview;
-            BeyondDynamo.Utils.AutomaticHide = PreviewOff.IsChecked;
-            if (PreviewOff.IsChecked)
+            AutomaticPreviewOff = new MenuItem { Header = "Automatic Preview Off" };
+            AutomaticPreviewOff.IsChecked = config.hideNodePreview;
+            BeyondDynamo.Utils.AutomaticHide = AutomaticPreviewOff.IsChecked;
+            if (AutomaticPreviewOff.IsChecked)
             {
                 VM.CurrentSpace.NodeAdded += BeyondDynamoFunctions.AutoNodePreviewOff;
             }
-            PreviewOff.Click +=(sender, args) =>
+            AutomaticPreviewOff.Click +=(sender, args) =>
             {
-                if (PreviewOff.IsChecked)
+                if (AutomaticPreviewOff.IsChecked)
                 {
                     config.hideNodePreview = false;
-                    PreviewOff.IsChecked = false;
+                    AutomaticPreviewOff.IsChecked = false;
                     VM.CurrentSpace.NodeAdded -= BeyondDynamoFunctions.AutoNodePreviewOff;
                 }
                 else
                 {
                     config.hideNodePreview = true;
-                    PreviewOff.IsChecked = true;
+                    AutomaticPreviewOff.IsChecked = true;
                     VM.CurrentSpace.NodeAdded += BeyondDynamoFunctions.AutoNodePreviewOff;
                 }
             };
-            BDmenuItem.Items.Add(PreviewOff);
+
+
+            BDmenuItem.Items.Add(BDToolspace);
+            BDmenuItem.Items.Add(SearchWorkspace);
+            BDmenuItem.Items.Add(ScriptImport);
+            BDmenuItem.Items.Add(RemoveBindingsCurrent);
+            BDmenuItem.Items.Add(PreviewNodes);
+            BDmenuItem.Items.Add(FreezeNodes);
+            BDmenuItem.Items.Add(RenamePythonInputs);
+            BDmenuItem.Items.Add(GroupColor);
+            BDmenuItem.Items.Add(EditNotes);
+            BDmenuItem.Items.Add(AutomaticPreviewOff);
+            //BDmenuItem.Items.Add(DeselectNodeLabels);
+
             #endregion
 
-            AboutItem = new MenuItem { Header = "About Beyond Dynamo"};
+            BDmenuItem.Items.Add(new Separator());
+            BDmenuItem.Items.Add(new Separator());
+
+            AboutItem = new MenuItem { Header = "About Beyond Dynamo" };
             AboutItem.Click += (sender, args) =>
             {
                 //Show the About dialog
@@ -626,9 +645,6 @@ namespace BeyondDynamo
             {
                 Content = "Shows all the information about Beyond Dynamo"
             };
-
-            BDmenuItem.Items.Add(new Separator());
-            BDmenuItem.Items.Add(new Separator());
 
             BDmenuItem.Items.Add(AboutItem);
             OpenLog = new MenuItem() { Header = "Open Beyond Dynamo Log" };

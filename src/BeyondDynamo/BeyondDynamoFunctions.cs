@@ -15,20 +15,8 @@ using Forms = System.Windows.Forms;
 using Controls = System.Windows.Controls;
 using Dynamo.UI.Commands;
 using Dynamo.Engine;
-using Dynamo.Scheduler;
-using Dynamo.Graph.Nodes.NodeLoaders;
-using Dynamo.Core;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using Dynamo.Wpf.Extensions;
-using Dynamo.Controls;
-using System.Windows.Media;
-using Shapes = System.Windows.Shapes;
-using Dynamo.Utilities;
-using DSCore;
-using NUnit.Framework;
-using System.Linq;
 using BeyondDynamo.UI;
+using System.Windows.Input;
 
 namespace BeyondDynamo
 {
@@ -552,25 +540,6 @@ namespace BeyondDynamo
             return config;
         }
 
-        /// <summary>
-        /// Freezes a selection of nodes
-        /// </summary>
-        /// <param name="model"></param>
-        public static void FreezeNodes(DynamoModel model)
-        {
-            WorkspaceModel workspace = model.CurrentWorkspace;
-            foreach (Dynamo.Graph.Nodes.NodeModel node in workspace.Nodes)
-            {
-                if (node.IsSelected)
-                {
-                    if (node.IsFrozen == false)
-                    {
-                        node.IsFrozen = true;
-                    }
-                }
-            }
-            KeepSelection(model);
-        }
 
         /// <summary>
         /// Unreezes a selection of nodes        
@@ -946,8 +915,7 @@ namespace BeyondDynamo
             nodeView.ToggleIsVisibleCommand.Execute(node);
             Utils.LogMessage("Turning Node preview off for " + node.Name);
         }
-
-        private static NodeViewModel GetNodeViewModel(NodeModel obj)
+        public static NodeViewModel GetNodeViewModel(NodeModel obj)
         {
             NodeViewModel nodeViewModel = null;
             foreach(NodeViewModel nodeView in Utils.DynamoVM.CurrentSpaceViewModel.Nodes)
@@ -959,6 +927,168 @@ namespace BeyondDynamo
                 }
             }
             return nodeViewModel;
+        }
+    }
+
+    public class FreezeNodesCommand : ICommand
+    {
+        public event EventHandler CanExecuteChanged;
+
+        public bool CanExecute(object parameter)
+        {
+            return true;
+        }
+        public void Execute(object parameter)
+        {
+            FreezeNodes();
+        }
+
+        /// <summary>
+        /// Freezes a selection of nodes
+        /// </summary>
+        /// <param name="model"></param>
+        public static void FreezeNodes()
+        {
+            DynamoModel model = BeyondDynamo.Utils.DynamoVM.Model;
+            WorkspaceModel workspace = model.CurrentWorkspace;
+            List<dynamic> result = ShouldFreeze(workspace.Nodes);
+            bool shouldFreeze = result[0];
+            List<NodeModel> nodes = result[1];
+            foreach (Dynamo.Graph.Nodes.NodeModel node in nodes)
+            {
+                if (shouldFreeze)
+                {
+                    node.IsFrozen = true;
+                }
+                else
+                {
+                    node.IsFrozen = false;
+                }
+            }
+            BeyondDynamoFunctions.KeepSelection(model);
+        }
+
+        public static List<dynamic> ShouldFreeze(IEnumerable<NodeModel> nodes)
+        {
+            List<dynamic> result = new List<dynamic>();
+            List<NodeModel> frozenNodes = new List<NodeModel>();
+            List<NodeModel> unfrozenNodes = new List<NodeModel>();
+            foreach (NodeModel node in nodes)
+            {
+                if (node.IsSelected)
+                {
+                    if (node.IsFrozen)
+                    {
+                        frozenNodes.Add(node);
+                    }
+                    else
+                    {
+                        unfrozenNodes.Add(node);
+                    }
+                }
+            }
+            if (frozenNodes.Count == 0)
+            {
+                result = new List<dynamic>()
+                {
+                    true,
+                    unfrozenNodes
+                };
+            }
+            else if (unfrozenNodes.Count == 0)
+            {
+                result = new List<dynamic>()
+                {
+                    false,
+                    frozenNodes
+                };
+            }
+            else if (frozenNodes.Count > unfrozenNodes.Count)
+            {
+                result = new List<dynamic>()
+                {
+                    true,
+                    unfrozenNodes
+                };
+            }
+            else
+            {
+                result = new List<dynamic>()
+                {
+                    false,
+                    frozenNodes
+                };
+            }
+            return result;
+        }
+    }
+    public class PreviewNodesCommand : ICommand
+    {
+        public event EventHandler CanExecuteChanged;
+
+        public bool CanExecute(object parameter)
+        {
+            return true;
+        }
+        public void Execute(object parameter)
+        {
+            PreviewNodes();
+        }
+
+        /// <summary>
+        /// Freezes a selection of nodes
+        /// </summary>
+        /// <param name="model"></param>
+        public static void PreviewNodes()
+        {
+            DynamoModel model = BeyondDynamo.Utils.DynamoVM.Model;
+            WorkspaceModel workspace = model.CurrentWorkspace;
+            List<NodeModel> nodes = ShouldPreview(workspace.Nodes);
+            foreach (Dynamo.Graph.Nodes.NodeModel node in nodes)
+            {
+                NodeViewModel nodeView = BeyondDynamoFunctions.GetNodeViewModel(node);
+                nodeView.ToggleIsVisibleCommand.Execute(node);
+                Utils.LogMessage("Changed Node preview for " + node.Name);
+            }
+            BeyondDynamoFunctions.KeepSelection(model);
+        }
+
+        public static List<NodeModel> ShouldPreview(IEnumerable<NodeModel> nodes)
+        {
+            List<NodeModel> result = new List<NodeModel>();
+            List<NodeModel> shownNodes = new List<NodeModel>();
+            List<NodeModel> hiddenNodes = new List<NodeModel>();
+            foreach (NodeModel node in nodes)
+            {
+                if (node.IsSelected)
+                {
+                    if (node.IsVisible)
+                    {
+                        shownNodes.Add(node);
+                    }
+                    else
+                    {
+                        hiddenNodes.Add(node);
+                    }
+                }
+            }
+            if (shownNodes.Count == 0)
+            {
+                result = hiddenNodes;
+            }
+            else if (hiddenNodes.Count == 0)
+            {
+                result = shownNodes;
+            }
+            else if (shownNodes.Count > hiddenNodes.Count)
+            {
+                result = hiddenNodes;
+            }
+            else
+            {
+                result = shownNodes;
+            }
+            return result;
         }
     }
 }
