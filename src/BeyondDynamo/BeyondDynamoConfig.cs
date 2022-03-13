@@ -24,6 +24,8 @@ namespace BeyondDynamo
 
         public bool hideNodePreview { get; set; }
 
+        public static BeyondDynamoConfig Current { get; set; }
+
         public BeyondDynamoConfig(string configFilePath)
         {
             ConfigFilePath = configFilePath;

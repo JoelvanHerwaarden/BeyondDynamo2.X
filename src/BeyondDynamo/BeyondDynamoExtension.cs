@@ -12,26 +12,9 @@ using Newtonsoft.Json.Linq;
 using Dynamo.Models;
 using Dynamo.Graph.Workspaces;
 using Dynamo.Graph.Nodes;
-using Dynamo.Controls;
-using System.Drawing;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using ProtoCore.Mirror;
-using ProtoCore.AST.AssociativeAST;
-using Dynamo.Wpf.ViewModels.Watch3D;
-using System.Collections.ObjectModel;
 using System.Windows;
-using System.Windows.Media;
-using Dynamo.UI.Controls;
-using Dynamo.Configuration;
-using System.Reflection;
-using System.Windows.Interop;
-using System.Runtime.Remoting.Channels;
-using DSCore;
-using ProtoCore.Namespace;
-using Dynamo.UI.Commands;
-using Dynamo.Utilities;
 using System.Windows.Input;
+using Dynamo.Graph.Annotations;
 
 namespace BeyondDynamo
 {
@@ -94,11 +77,6 @@ namespace BeyondDynamo
         /// Import Script Menu Item
         /// </summary>
         private MenuItem ScriptImport;
-
-        /// <summary>
-        /// Search Nodes Menu Item
-        /// </summary>
-        private MenuItem SearchWorkspace;
 
         /// <summary>
         /// Edit Notes Menu Item
@@ -205,6 +183,7 @@ namespace BeyondDynamo
             Utils.LogMessage("Creating Configuration File Started...");
             Directory.CreateDirectory(configFolderPath);
             config = new BeyondDynamoConfig(this.configFilePath);
+            BeyondDynamoConfig.Current = config;
 
             Utils.LogMessage("Creating Configuration File Completed!");
         }
@@ -391,7 +370,7 @@ namespace BeyondDynamo
                     }
                 }
             };
-            Utils.LogMessage("Playerpath = "+this.config.playerPath);
+            Utils.LogMessage("Playerpath = " + this.config.playerPath);
             if (this.config.playerPath != null | this.config.playerPath != string.Empty)
             {
                 try
@@ -401,12 +380,12 @@ namespace BeyondDynamo
                         BeyondDynamoFunctions.RetrievePlayerFiles(PlayerScripts, VM, this.config.playerPath, extraMenuItems);
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                    Utils.LogMessage("Loading Player Path Warning: "+e.Message);
+                    Utils.LogMessage("Loading Player Path Warning: " + e.Message);
                     PlayerScripts.Items.Add(SetPlayerPath);
                 }
-                
+
             }
             else
             {
@@ -492,7 +471,8 @@ namespace BeyondDynamo
             GroupColor = new MenuItem { Header = "Change Group Color" };
             GroupColor.Click += (sender, args) =>
             {
-                this.config = BeyondDynamo.BeyondDynamoFunctions.ChangeGroupColor(VM.CurrentSpaceViewModel, this.config);
+                List<AnnotationModel> selectedGroups = BeyondDynamo.BeyondDynamoFunctions.GetAllSelectedGroups();
+                this.config = BeyondDynamo.BeyondDynamoFunctions.ChangeGroupColor(selectedGroups) ;
             };
             GroupColor.ToolTip = new ToolTip()
             {
@@ -520,17 +500,6 @@ namespace BeyondDynamo
             };
             RenamePythonInputs.ToolTip = new ToolTip() { Content = "Rename the Input names and the Output name for a Python Node to make them more descriptive" };
 
-            SearchWorkspace = new MenuItem { Header = "Search Workspace" };
-            SearchWorkspace.Click += (sender, args) =>
-            {
-                BeyondDynamoSearchView panelView = new BeyondDynamoSearchView();
-                SearchViewControl SearchControl = new SearchViewControl(VM);
-                p.AddToExtensionsSideBar(panelView, SearchControl);
-            };
-            SearchWorkspace.ToolTip = new ToolTip()
-            {
-                Content = "This will let you search for Nodes in the Current workspace"
-            };
 
             EditNotes = new MenuItem { Header = "Edit Note Text" };
             EditNotes.Click += (sender, args) =>
@@ -557,7 +526,7 @@ namespace BeyondDynamo
                 FreezeNodesCommand.FreezeNodes();
             };
             Utils.DynamoWindow.CommandBindings.Add(new CommandBinding(command));
-            KeyGesture shortkey = new KeyGesture( Key.E, System.Windows.Input.ModifierKeys.Control); ;
+            KeyGesture shortkey = new KeyGesture(Key.E, System.Windows.Input.ModifierKeys.Control); ;
             Utils.DynamoWindow.InputBindings.Add(new InputBinding(command, shortkey));
             FreezeNodes.ToolTip = new ToolTip()
             {
@@ -580,13 +549,29 @@ namespace BeyondDynamo
                 Content = "Toggle the preview on and off for multiple nodes"
             };
 
+            MenuItem EvaluateGroup = new MenuItem { Header = "Eval Group" };
+            EvaluateGroup.Click += (sender, args) =>
+            {
+                BeyondDynamoFunctions.GetAllSelectedUngroupedItems();
+            };
+            
+
 
             BDToolspace = new MenuItem { Header = "Beyond Dynamo Toolspace" };
             BDToolspace.Click += (sender, args) =>
             {
                 BeyondDynamoToolSpaceView panelView = new BeyondDynamoToolSpaceView();
                 ToolSpaceControl toolspacecontrol = new ToolSpaceControl();
-                p.AddToExtensionsSideBar(panelView, toolspacecontrol);
+                try
+                {
+
+                    p.AddToExtensionsSideBar(panelView, toolspacecontrol);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("Could not execute this function because:\n" + e.Message);
+                    panelView.Dispose();
+                }
             };
             BDToolspace.ToolTip = new ToolTip()
             {
@@ -616,9 +601,10 @@ namespace BeyondDynamo
                 }
             };
 
-
-            BDmenuItem.Items.Add(BDToolspace);
-            BDmenuItem.Items.Add(SearchWorkspace);
+            if (double.Parse(VM.Version.Substring(0,3)) >= 2.4)
+            {
+                BDmenuItem.Items.Add(BDToolspace);
+            }
             BDmenuItem.Items.Add(ScriptImport);
             BDmenuItem.Items.Add(RemoveBindingsCurrent);
             BDmenuItem.Items.Add(PreviewNodes);
@@ -627,6 +613,7 @@ namespace BeyondDynamo
             BDmenuItem.Items.Add(GroupColor);
             BDmenuItem.Items.Add(EditNotes);
             BDmenuItem.Items.Add(AutomaticPreviewOff);
+            //BDmenuItem.Items.Add(EvaluateGroup);
             //BDmenuItem.Items.Add(DeselectNodeLabels);
 
             #endregion

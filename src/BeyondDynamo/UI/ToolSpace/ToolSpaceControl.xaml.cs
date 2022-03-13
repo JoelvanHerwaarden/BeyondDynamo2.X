@@ -13,8 +13,9 @@ using System.IO;
 using Dynamo.Graph;
 using Dynamo.Graph.Workspaces;
 using Dynamo.UI.Commands;
+using Dynamo.Graph.Annotations;
 
-namespace BeyondDynamo
+namespace BeyondDynamo.UI
 {
     /// <summary>
     /// Interaction logic for TextBoxWindow.xaml
@@ -25,88 +26,81 @@ namespace BeyondDynamo
         private List<NodeModel> completedNodes = new List<NodeModel>();
         private List<NodeModel> warningNodes = new List<NodeModel>();
         private List<NodeModel> errorNodes = new List<NodeModel>();
+
+
+        //These are all the nodes in the dynamo model
+        private List<NodeModel> nodes { get; set; }
+
+        //These are all the Node names
+        private List<SearchNodeLabel> nodeLabels { get; set; }
+
+        //These are the nodes which match the search term
+        private List<NodeModel> foundNodes { get; set; }
+
         public ToolSpaceControl()
         {
             InitializeComponent();
             DynamoViewModel viewmodel = BeyondDynamo.Utils.DynamoVM;
             //viewmodel.Model.RefreshCompleted += EvaluateGraph;
-        }
 
-        private async void EvaluateGraph(HomeWorkspaceModel model)
-        {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            //Get the nodes in the current workspace
+            nodes = (List<NodeModel>)viewmodel.CurrentSpace.Nodes;
+
+            //Create new lists for the names and the nodes
+            this.nodeLabels = new List<SearchNodeLabel>();
+            this.foundNodes = new List<NodeModel>();
+
+            //Start looping over the nodes and get the name and node. Add them to the right lists.
+            foreach (NodeModel node in nodes)
             {
-                this.completedNodes = new List<NodeModel>();
-                this.warningNodes = new List<NodeModel>();
-                this.errorNodes = new List<NodeModel>();
-                WarningStacker.Children.Clear();
-                WorkspaceModel currentWorkSpace = BeyondDynamo.Utils.DynamoVM.CurrentSpace;
-                foreach (NodeModel node in currentWorkSpace.Nodes)
-                {
-                    if (node.State == ElementState.Active)
-                    {
-                        completedNodes.Add(node);
-                    }
-                    else if (node.State == ElementState.Error)
-                    {
-                        errorNodes.Add(node);
-                    }
-                    else if (node.State == ElementState.Warning || node.State == ElementState.PersistentWarning)
-                    {
-                        warningNodes.Add(node);
-                        string warningText = BeyondDynamoFunctions.GetNodeViewModel(node).ErrorBubble.FullContent;
-                        Button warningButton = new Button()
-                        {
-                            Style = (Style)this.Resources["WarningButton"],
-                            Content = warningText
-                        };
-                        warningButton.Click += WarningButton_Click; ;
-                        WarningStacker.Children.Add(warningButton);
-                    }
-                    else
-                    {
+                node.PropertyChanged += (sender, args) => { this.Refresh(); };
+                SearchNodeLabel label = new SearchNodeLabel(node);
+                this.foundNodes.Add(node);
+                nodeLabels.Add(label);
+            }
 
-                    }
-                }
-            }));
-           
-        }
+            //Add all the names of the nodes to the nodeStacker control 
+            foreach (SearchNodeLabel label in nodeLabels)
+            {
+                this.nodeStacker.Children.Add(label);
+            }
 
-        private void WarningButton_Click(object sender, RoutedEventArgs e)
-        {
-            Button current = (Button)sender;
-            int index = this.WarningStacker.Children.IndexOf(current);
-            NodeModel node = warningNodes[index];
-            DynamoViewModel dynamoViewModel = BeyondDynamo.Utils.DynamoVM;
-
-            //Run the Command twice for a better Result.
-            dynamoViewModel.CurrentSpaceViewModel.FindByIdCommand.Execute(node.GUID);
-            dynamoViewModel.FitViewCommand.Execute(dynamoViewModel);
-            dynamoViewModel.CurrentSpaceViewModel.FindByIdCommand.Execute(node.GUID);
-            dynamoViewModel.FitViewCommand.Execute(dynamoViewModel);
+            //Register events for adding and removing nodes to the current workspace
+            viewmodel.CurrentSpace.NodeAdded += (obj) =>
+            {
+                NodeModel node = (NodeModel)obj;
+                node.PropertyChanged += (sender, args) => { this.Refresh(); };
+                this.Refresh();
+            };
+            viewmodel.CurrentSpace.NodeRemoved += (obj) =>
+            {
+                this.Refresh();
+            };
+            viewmodel.Model.WorkspaceAdded += (obj) =>
+            {
+                this.Refresh();
+            };
+            viewmodel.Model.WorkspaceRemoved += (obj) =>
+            {
+                this.Refresh();
+            };
+            viewmodel.Model.WorkspaceOpening += (obj) =>
+            {
+                this.Refresh();
+            };
         }
 
         private void ColorButton_Click(object sender, RoutedEventArgs e)
         {
-            DynamoViewModel VM = BeyondDynamo.Utils.DynamoVM;
-            WorkspaceViewModel currentViewModel = VM.CurrentSpaceViewModel;
-            List<AnnotationViewModel> selectedGroups = new List<AnnotationViewModel>();
-            int count = 0;
-            foreach (AnnotationViewModel group in currentViewModel.Annotations)
-            {
-                Button button = (Button)sender;
-                if (group.AnnotationModel.IsSelected)
-                {
-                    selectedGroups.Add(group);
-                    SolidColorBrush color = (SolidColorBrush)button.Foreground;
-                    group.Background = color.Color;
-                    count++;
-                }
-            }
-            if (count == 0)
-            {
-                MessageBox.Show("No group Selected");
-            }
+            List<AnnotationModel> selectedGroups = BeyondDynamoFunctions.GetAllSelectedGroups();
+            Button button = (Button)sender;
+            SolidColorBrush color = (SolidColorBrush)button.Foreground;
+            System.Drawing.Color newColor = System.Drawing.Color.FromArgb(color.Color.A,
+                                                             color.Color.R,
+                                                             color.Color.G,
+                                                             color.Color.B);
+            string colorString = System.Drawing.ColorTranslator.ToHtml(newColor);
+            BeyondDynamo.BeyondDynamoFunctions.ChangeGroupColor(selectedGroups, colorString);
         }
         private void Button_MouseEnter(object sender, MouseEventArgs e)
         {
@@ -152,10 +146,8 @@ namespace BeyondDynamo
 
         private void SpecialColorButton_Click(object sender, RoutedEventArgs e)
         {
-            WorkspaceViewModel workspaceView = BeyondDynamo.Utils.DynamoVM.CurrentSpaceViewModel;
-            string configFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dynamo\\BeyondDynamoSettings\\beyondDynamo2Config.json");
-            BeyondDynamoConfig config = new BeyondDynamoConfig(configFilePath);
-            BeyondDynamoFunctions.ChangeGroupColor(workspaceView, config);
+            List<AnnotationModel> selectedGroups = BeyondDynamoFunctions.GetAllSelectedGroups();
+            BeyondDynamoFunctions.ChangeGroupColor(selectedGroups);
         }
 
         private void PreviewButton_Click(object sender, RoutedEventArgs e)
@@ -164,10 +156,79 @@ namespace BeyondDynamo
             PreviewNodesCommand.PreviewNodes();
         }
 
-        private void ScrollViewer_Unloaded(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// This methode in triggered when the text in the searchbar changes. It activates the searching algorithm
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            DynamoViewModel viewmodel = BeyondDynamo.Utils.DynamoVM;
-            //viewmodel.Model.RefreshCompleted -= EvaluateGraph;
+            Search();
+
         }
+
+
+        private void Search()
+        {
+            string searchTerm = searchBox.Text;
+
+            this.nodeStacker.Children.Clear();
+            this.foundNodes.Clear();
+            if (searchTerm != "")
+            {
+                for (int i = 0; i < nodeLabels.Count; i++)
+                {
+                    SearchNodeLabel label = nodeLabels[i];
+                    string name = label.NodeModel.Name;
+                    if (name.ToUpper().Contains(searchTerm.ToUpper()))
+                    {
+                        this.nodeStacker.Children.Add(label);
+                        this.foundNodes.Add(nodes[i]);
+                    }
+                }
+            }
+            else
+            {
+                this.foundNodes.Clear();
+                this.foundNodes.AddRange(this.nodes);
+                foreach (SearchNodeLabel label in nodeLabels)
+                {
+                    this.nodeStacker.Children.Add(label);
+                }
+            }
+        }
+        
+
+
+        /// <summary>
+        /// This methodes reloads all the Nodes and names from the current Workspace.
+        /// </summary>
+        private void Refresh()
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                DynamoViewModel DynamoViewModel = BeyondDynamo.Utils.DynamoVM;
+                nodes = (List<NodeModel>)DynamoViewModel.CurrentSpace.Nodes;
+                this.nodeLabels.Clear();
+                this.foundNodes.Clear();
+                this.nodeStacker.Children.Clear();
+                foreach (NodeModel node in nodes)
+                {
+                    SearchNodeLabel nodeLabel = new SearchNodeLabel(node);
+
+                    this.foundNodes.Add(node);
+                    nodeLabels.Add(nodeLabel);
+                }
+                foreach (SearchNodeLabel label in nodeLabels)
+                {
+                    this.nodeStacker.Children.Add(label);
+                }
+                this.searchBox.Text = this.searchBox.Text;
+                Search();
+            });
+            
+        }
+
+
     }
 }

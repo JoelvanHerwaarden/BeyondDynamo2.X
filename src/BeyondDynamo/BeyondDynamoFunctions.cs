@@ -17,6 +17,7 @@ using Dynamo.UI.Commands;
 using Dynamo.Engine;
 using BeyondDynamo.UI;
 using System.Windows.Input;
+using Dynamo.Graph;
 
 namespace BeyondDynamo
 {
@@ -37,30 +38,93 @@ namespace BeyondDynamo
             }
         }
 
-        /// <summary>
-        /// Returns the Nodes and Their names as a List
-        /// </summary>
-        /// <param name="model"></param>
-        /// <returns></returns>
-        public static List<dynamic> GetNodes(WorkspaceModel model)
-        {
-            List<NodeModel> nodes = new List<NodeModel>();
-            List<string> nodeNames = new List<string>();
-            List<Guid> nodeGUIDs = new List<Guid>();
-            foreach (NodeModel node in model.Nodes)
-            {
-                nodes.Add(node);
-                nodeNames.Add(node.Name);
-                nodeGUIDs.Add(node.GUID);
-            }
-            List<dynamic> output = new List<dynamic>
-            {
-                nodes,
-                nodeNames,
-                nodeGUIDs
-            };
 
-            return output;
+        public static Dictionary<string,dynamic> GetAllSelectedUngroupedItems()
+        {
+            DynamoViewModel VM = BeyondDynamo.Utils.DynamoVM;
+            WorkspaceViewModel currentViewModel = VM.CurrentSpaceViewModel;
+            Dictionary<string, dynamic> result = new Dictionary<string, dynamic>();
+            List<dynamic> selectedGroups = new List<dynamic>();
+            List<ModelBase> ungroupedItems = new List<ModelBase>();
+            List<NodeModel> ungroupedNodes = new List<NodeModel>();
+            List<NoteModel> ungroupedNotes = new List<NoteModel>();
+            List<Guid> GroupedItems = new List<Guid>();
+            foreach (AnnotationViewModel group in currentViewModel.Annotations)
+            {
+                if (group.AnnotationModel.IsSelected)
+                {
+                    selectedGroups.Add(group.AnnotationModel);
+                    foreach (ModelBase modelbase in group.Nodes)
+                    {
+                        GroupedItems.Add(modelbase.GUID);
+                    }
+                }
+            }
+            foreach(NodeViewModel node in currentViewModel.Nodes)
+            {
+                if(node.IsSelected && !GroupedItems.Contains(node.NodeModel.GUID))
+                {
+                    ungroupedItems.Add(node.NodeModel);
+                    ungroupedNodes.Add(node.NodeModel);
+                }
+            }
+
+            foreach (NoteViewModel note in currentViewModel.Notes)
+            {
+                if (note.IsSelected && !GroupedItems.Contains(note.Model.GUID))
+                {
+                    ungroupedItems.Add(note.Model);
+                    ungroupedNotes.Add(note.Model);
+                }
+            }
+            result.Add("SelectedGroups", selectedGroups);
+            result.Add("UngroupedItems", ungroupedItems);
+            result.Add("UngroupedNodes", ungroupedNodes);
+            result.Add("UngroupedNotes", ungroupedNotes);
+
+            return result;
+        }
+
+        public static List<AnnotationModel> GetAllSelectedGroups()
+        {
+            DynamoViewModel VM = BeyondDynamo.Utils.DynamoVM;
+
+            List<AnnotationModel> selectedGroups = new List<AnnotationModel>();
+            Dictionary<string,dynamic> result = GetAllSelectedUngroupedItems();
+            List<NodeModel> ungroupedNodes = (List<NodeModel>)result["UngroupedNodes"];
+            List<NoteModel> ungroupedNotes = (List<NoteModel>)result["UngroupedNotes"];
+
+
+            //if (ungroupedNodes.Count > 0 || ungroupedNotes.Count > 0)
+            //{
+            //    AnnotationModel newGroup = new AnnotationModel(ungroupedNodes, ungroupedNotes);
+            //    VM.Model.ExecuteCommand(new DynamoModel.CreateAnnotationCommand(newGroup.GUID, newGroup.AnnotationText, newGroup.X, newGroup.Y, true));
+
+            //    AnnotationViewModel newGroupViewModel = new AnnotationViewModel(VM.CurrentSpaceViewModel, newGroup);
+            //    newGroupViewModel.AnnotationText = "<Click here to edit the group title>";
+            //    VM.CurrentSpaceViewModel.Annotations.Add(newGroupViewModel);
+
+            //    selectedGroups.Add(newGroup);
+            //    foreach (NodeModel node in ungroupedNodes)
+            //    {
+            //        node.IsSelected = true;
+            //        NodeViewModel nodeView = BeyondDynamoFunctions.GetNodeViewModel(node);
+            //        if (VM.AddModelsToGroupModelCommand.CanExecute(node.GUID))
+            //        {
+            //            VM.AddModelsToGroupModelCommand.Execute(node.GUID);
+            //        }
+            //    }
+            //}
+
+            foreach (AnnotationViewModel viewGroup in VM.CurrentSpaceViewModel.Annotations)
+            {
+                if (viewGroup.AnnotationModel.IsSelected)
+                {
+                    selectedGroups.Add(viewGroup.AnnotationModel);
+                }
+            }
+            return selectedGroups;
+
         }
 
         /// <summary>
@@ -505,33 +569,36 @@ namespace BeyondDynamo
         /// </summary>
         /// <param name="model">The Current Dynamo Model</param>
         /// <param name="config">The Beyond Dynamo Settings</param>
-        public static BeyondDynamoConfig ChangeGroupColor(WorkspaceViewModel model, BeyondDynamoConfig config)
+        public static BeyondDynamoConfig ChangeGroupColor(List<AnnotationModel> selectedGroups, string color=null)
         {
-            List<AnnotationModel> selectedGroups = new List<AnnotationModel>();
-            foreach (AnnotationViewModel groupViewModel in model.Annotations)
-            {
-                AnnotationModel group = groupViewModel.AnnotationModel;
-                if (group.IsSelected)
-                {
-                    selectedGroups.Add(group);
-                }
-            }
+            BeyondDynamoConfig config = BeyondDynamoConfig.Current;
             if (selectedGroups.Count > 0)
             {
-                System.Windows.Forms.ColorDialog colorDialog = new System.Windows.Forms.ColorDialog();
-                if (config.customColors != null)
+                if (color == null)
                 {
-                    colorDialog.CustomColors = config.customColors;
-                }
-                if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    foreach (AnnotationModel group in selectedGroups)
+                    System.Windows.Forms.ColorDialog colorDialog = new System.Windows.Forms.ColorDialog();
+                    if (config.customColors != null)
                     {
-                        string colorString = System.Drawing.ColorTranslator.ToHtml(colorDialog.Color);
-                        group.Background = colorString;
+                        colorDialog.CustomColors = config.customColors;
                     }
-                    config.customColors = colorDialog.CustomColors;
+                    if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        foreach (AnnotationModel group in selectedGroups)
+                        {
+                            string colorString = System.Drawing.ColorTranslator.ToHtml(colorDialog.Color);
+                            group.Background = colorString;
+                        }
+                        config.customColors = colorDialog.CustomColors;
+                    }
                 }
+                else
+                {
+                    foreach(AnnotationModel group in selectedGroups)
+                    {
+                        group.Background = color;
+                    }
+                }
+                
             }
             else
             {
@@ -541,28 +608,8 @@ namespace BeyondDynamo
         }
 
 
-        /// <summary>
-        /// Unreezes a selection of nodes        
-        /// </summary>
-        /// <param name="model"></param>
-        public static void UnfreezeNodes(DynamoModel model)
-        {
-            WorkspaceModel workspace = model.CurrentWorkspace;
-            foreach (Dynamo.Graph.Nodes.NodeModel node in workspace.Nodes)
-            {
-                if (node.IsSelected)
-                {
-                    if (node.IsFrozen)
-                    {
-                        node.IsFrozen = false;
-                    }
-                }
-            }
-            KeepSelection(model);
 
 
-        }
-        
         /// <summary>
         /// Opens a Text editor window for each selected Note
         /// </summary>
