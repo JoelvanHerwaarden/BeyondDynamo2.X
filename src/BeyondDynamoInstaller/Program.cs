@@ -21,13 +21,15 @@ namespace BeyondDynamoInstaller
             Console.WriteLine("Make sure that Dynamo / Revit / Civil3D / Autocad are all closed! Hit any key to continue");
             Console.ReadLine();
             GitHubRequests.DynamoLocations = GitHubRequests.GetDynamoCorePaths();
-            Console.WriteLine("Installation Started");
+            Console.WriteLine("\nInstallation Started");
             string version = GitHubRequests.RequestLatestVersion().Result;
-            Console.WriteLine(version);
-            GitHubRequests.GetAssets().Wait();
+
+            GitHubRequests.GetAssets();
             List<string> filepaths = GitHubRequests.DownloadAssets();
+
+            Console.WriteLine("\nDone Downloading Project Assets");
             GitHubRequests.CopyAssetsToLocations(filepaths);
-            Console.WriteLine("Installation Completed!");
+            Console.WriteLine("\nInstallation Completed!");
             Console.ReadLine();
         }
     }
@@ -40,6 +42,8 @@ namespace BeyondDynamoInstaller
         public const string Repo = "BeyondDynamo2.X";
         public static string ReleaseId = null;
         public static Dictionary<string, string> Assets = null;
+        private static string AssetsUrl = null;
+        private static double LatestVersion = 0;
 
         public static List<string> DynamoLocations = new List<string>()
         {
@@ -54,6 +58,7 @@ namespace BeyondDynamoInstaller
             Console.WriteLine("Start Version Request");
             string result = null;
             string requestUri = string.Format(@"{0}/repos/{1}/{2}/releases", GitHubAPI, Owner, Repo);
+            Clipboard.SetText(requestUri);
             try
             {
                 ServicePointManager.Expect100Continue = true;
@@ -79,21 +84,16 @@ namespace BeyondDynamoInstaller
                 foreach (JObject release in githubReleases.Children())
                 {
                     JToken versionNumber = release.GetValue("tag_name");
-                    releasedVersions.Add((double)versionNumber);
-                }
-                releasedVersions.Sort();
-                string latestVersionNumber = releasedVersions[releasedVersions.Count - 1].ToString();
-                foreach (JObject release in githubReleases.Children())
-                {
-                    JToken versionNumber = release.GetValue("tag_name");
-                    if(versionNumber.ToString() == latestVersionNumber)
+                    double version = (double)versionNumber.ToObject(typeof(double));
+                    if (version > LatestVersion)
                     {
-                        JToken releaseId = release.GetValue("id");
-                        ReleaseId = releaseId.ToString();
-                        Console.WriteLine(ReleaseId);
-                        break;
+                        LatestVersion = version;
+                        AssetsUrl = ((string)release.GetValue("assets_url"));
                     }
                 }
+
+                Console.WriteLine("\nThe Latest version of Beyond Dynamo is " + LatestVersion);
+                result = LatestVersion.ToString();
             }
             catch (Exception e)
             {
@@ -103,11 +103,11 @@ namespace BeyondDynamoInstaller
             return result;
         }
 
-        public async static Task GetAssets()
+        public static void GetAssets()
         {
             Console.WriteLine("Start Get Assets");
             string result = null;
-            string requestUri = string.Format(@"{0}/repos/{1}/{2}/releases/{3}/assets", GitHubAPI, Owner, Repo, ReleaseId);
+            string requestUri = AssetsUrl;
             try
             {
                 ServicePointManager.Expect100Continue = true;
@@ -151,16 +151,19 @@ namespace BeyondDynamoInstaller
         public static List<string> DownloadAssets()
         {
             List<string> filePaths = new List<string>();
-            Console.WriteLine("Start Downloading Assets");
+
+            if (!Directory.Exists(Path.GetTempPath())) { Directory.CreateDirectory(Path.GetTempPath()); }
+
+            Console.WriteLine("\nStart Downloading Assets");
             using (var client = new WebClient())
             {
+                
                 string[] keys = new List<string> { "BeyondDynamo.dll", "BeyondDynamo_ViewExtensionDefinition.xml" }.ToArray();
                 foreach (string key in keys)
                 {
                     string filePath = Path.Combine(Path.GetTempPath(), key);
-                    Console.WriteLine("Downloading " + key);
+                    Console.WriteLine("\nDownloading " + key);
                     client.DownloadFile(Assets[key], filePath);
-                    Console.WriteLine(filePath);
                     Console.WriteLine("Finished " + key);
                     filePaths.Add(filePath);
                 }
@@ -171,7 +174,7 @@ namespace BeyondDynamoInstaller
 
         public static void CopyAssetsToLocations(List<string> filePaths)
         {
-            Console.WriteLine("Started Copying Files");
+            Console.WriteLine("\nStarted Copying Files");
             foreach (string location in DynamoLocations)
             {
                 if (Directory.Exists(location))
@@ -181,12 +184,12 @@ namespace BeyondDynamoInstaller
                     try
                     {
                         File.Copy(source, destPath, true);
-                        Console.WriteLine(string.Format("Copied {0} to {1}\n", Path.GetFileName(source), location));
+                        Console.WriteLine(string.Format("\nCopied {0} to {1}\n", Path.GetFileName(source), location));
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(string.Format("Failed to Copy {0} to {1}", Path.GetFileName(source), location));
-                        Console.WriteLine(e.Message + "\n");
+                        Console.WriteLine(string.Format("\nFailed to Copy {0} to {1}", Path.GetFileName(source), location));
+                        Console.WriteLine(e.Message);
                     }
 
                     source = filePaths[1];
@@ -195,17 +198,17 @@ namespace BeyondDynamoInstaller
                     try
                     {
                         File.Copy(source, destPath, true);
-                        Console.WriteLine(string.Format("Copied {0} to {1}\n", Path.GetFileName(source), fileLocation));
+                        Console.WriteLine(string.Format("\nCopied {0} to {1}\n", Path.GetFileName(source), fileLocation));
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(string.Format("Failed to Copy {0} to {1}", Path.GetFileName(source), location));
-                        Console.WriteLine(e.Message+"\n");
+                        Console.WriteLine(string.Format("\nFailed to Copy {0} to {1}", Path.GetFileName(source), location));
+                        Console.WriteLine(e.Message);
                     }
                 }
             }
-            Console.WriteLine("Finished Copying Files");
-            Console.WriteLine("Start Deleting Download Files");
+            Console.WriteLine("\nFinished Copying Files");
+            Console.WriteLine("\nStart Deleting Download Files");
             foreach (string f in filePaths)
             {
                 File.Delete(f);

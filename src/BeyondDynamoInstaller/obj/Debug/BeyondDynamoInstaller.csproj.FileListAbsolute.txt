@@ -1,3 +1,11 @@
 C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamoInstaller\obj\Debug\BeyondDynamoInstaller.csproj.AssemblyReference.cache
 C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamoInstaller\obj\Debug\BeyondDynamoInstaller.csproj.SuggestedBindingRedirects.cache
 C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamoInstaller\obj\Debug\BeyondDynamoInstaller.csproj.CoreCompileInputs.cache
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamoInstaller\bin\Debug\BeyondDynamoInstaller.exe.config
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamoInstaller\bin\Debug\BeyondDynamoInstaller.exe
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamoInstaller\bin\Debug\BeyondDynamoInstaller.pdb
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamoInstaller\bin\Debug\Newtonsoft.Json.xml
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamoInstaller\obj\Debug\BeyondDynamoInstaller.csproj.Fody.CopyLocal.cache
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamoInstaller\obj\Debug\BeyondDynamoInstaller.csproj.CopyComplete
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamoInstaller\obj\Debug\BeyondDynamoInstaller.exe
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamoInstaller\obj\Debug\BeyondDynamoInstaller.pdb
