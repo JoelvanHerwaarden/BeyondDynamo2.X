@@ -1,0 +1,16 @@
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\BeyondDynamo.csproj.AssemblyReference.cache
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\UI\ToolSpace\ToolSpaceControl.baml
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\UI\TextBox\NoteTextBoxWindow.baml
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\Resources\Styles.g.cs
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\UI\ChangeNodeColor\ChangeNodeColorsWindow.g.cs
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\UI\RenameInputs\InputsWindow.g.cs
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\UI\ToolSpace\SearchNodeLabel.g.cs
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\UI\ToolSpace\ToolSpaceControl.g.cs
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\UI\OrderPlayerInput\OrderPlayerInputWindow.g.cs
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\UI\RemoveTraceData\RemoveTraceDataWindow.g.cs
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\UI\TextBox\NoteTextBoxWindow.g.cs
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\BeyondDynamo_MarkupCompile.cache
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\BeyondDynamo_MarkupCompile.lref
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\BeyondDynamo.resources.resources
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\BeyondDynamo.UI.About.About.resources
+C:\Users\907335\GitHub\BeyondDynamo2.X\src\BeyondDynamo\obj\Debug\BeyondDynamo.csproj.GenerateResource.cache
