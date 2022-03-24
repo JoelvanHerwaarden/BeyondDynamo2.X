@@ -1,0 +1,11 @@
+*.dll
+*.pdb
+*.cache
+**/bin
+**/Debug
+**/Release
+*.ide
+*.suo
+**/.vs
+*.dyn
+

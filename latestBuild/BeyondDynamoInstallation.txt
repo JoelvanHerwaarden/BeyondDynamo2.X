@@ -1,0 +1,17 @@
+MAKE SURE TO RIGHT CLICK THE FILES AND GO TO PROPERTIES. THEN UNBLOCK THE FILE BEFORE DRAGGING THEM INTO THE FOLDERS
+
+For REVIT 2017, 2018, 2019
+Copy BeyondDynamo.dll to C:\Program Files\Dynamo\Dynamo Core\2
+
+Copy BeyondDynamo_ViewExtensionDefinition.xml to C:\Program Files\Dynamo\Dynamo Core\2\viewExtensions
+
+
+FOR REVIT 2020:
+Copy BeyondDynamo.dll to C:\Program Files\Autodesk\Revit 2020\AddIns\DynamoForRevit
+
+Copy BeyondDynamo_ViewExtensionDefinition.xml to C:\Program Files\Autodesk\Revit 2020\AddIns\DynamoForRevit\viewExtensions
+
+FOR CIVIL3D 2020:
+Copy BeyondDynamo.dll to C:\Program Files\Autodesk\AutoCAD 2020\C3D\Dynamo\Core
+
+Copy BeyondDynamo_ViewExtensionDefinition.xml to C:\Program Files\Autodesk\AutoCAD 2020\C3D\Dynamo\Core\viewExtensions
