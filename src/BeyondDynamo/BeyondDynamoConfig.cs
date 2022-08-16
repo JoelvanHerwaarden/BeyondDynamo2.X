@@ -20,8 +20,6 @@ namespace BeyondDynamo
 
         public int[] customColors { get; set; }
 
-        public string playerPath { get; set; }
-
         public bool hideNodePreview { get; set; }
 
         public static BeyondDynamoConfig Current { get; set; }
@@ -36,22 +34,6 @@ namespace BeyondDynamo
                 {
                     JToken config = JToken.Parse(content);
                     customColors = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(config["customColors"].ToString());
-                    try
-                    {
-                        if (config["playerPath"].ToString() != "null")
-                        {
-                            playerPath = config["playerPath"].ToString();
-                        }
-                        else
-                        {
-                            throw new Exception();
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        Utils.LogMessage("Error loading Player path: " + exception.Message);
-                        playerPath = null;
-                    }
                     try
                     {
                         string hidePreview = config["hideNodePreview"].ToString();

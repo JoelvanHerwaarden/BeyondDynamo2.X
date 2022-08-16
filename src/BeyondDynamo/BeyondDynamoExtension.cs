@@ -99,10 +99,6 @@ namespace BeyondDynamo
         /// </summary>
         private MenuItem OrderPlayerInput;
 
-        /// <summary>
-        /// Player script menu item
-        /// </summary>
-        private MenuItem PlayerScripts;
 
         /// <summary>
         /// Open Player Folderpath Menu Item
@@ -343,63 +339,9 @@ namespace BeyondDynamo
                 "\nOther nodes will show up in Refinery"
             };
 
-            Utils.LogMessage("Loading Menu Items: Player Scripts Started...");
-            PlayerScripts = new MenuItem { Header = "Player Graphs" };
-            OpenPlayerPath = new MenuItem { Header = "Open Player Path" };
-            OpenPlayerPath.Click += (sender, args) =>
-            {
-                System.Diagnostics.Process.Start(this.config.playerPath);
-            };
 
-            SetPlayerPath = new MenuItem { Header = "Set Player Path" };
-            List<MenuItem> extraMenuItems = new List<MenuItem> { SetPlayerPath, OpenPlayerPath };
-            SetPlayerPath.Click += (sender, args) =>
-            {
-                Forms.FolderBrowserDialog browserDialog = new Forms.FolderBrowserDialog();
-                if (this.config.playerPath != null)
-                {
-                    browserDialog.SelectedPath = this.config.playerPath;
-                }
-                if (browserDialog.ShowDialog() == Forms.DialogResult.OK)
-                {
-                    if (browserDialog.SelectedPath != null)
-                    {
-                        PlayerScripts.Items.Clear();
-                        BeyondDynamoFunctions.RetrievePlayerFiles(PlayerScripts, VM, browserDialog.SelectedPath, extraMenuItems);
-                        this.config.playerPath = browserDialog.SelectedPath;
-                    }
-                }
-            };
-            Utils.LogMessage("Playerpath = " + this.config.playerPath);
-            if (this.config.playerPath != null | this.config.playerPath != string.Empty)
-            {
-                try
-                {
-                    if (Directory.Exists(Path.GetDirectoryName(this.config.playerPath)))
-                    {
-                        BeyondDynamoFunctions.RetrievePlayerFiles(PlayerScripts, VM, this.config.playerPath, extraMenuItems);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Utils.LogMessage("Loading Player Path Warning: " + e.Message);
-                    PlayerScripts.Items.Add(SetPlayerPath);
-                }
-
-            }
-            else
-            {
-                PlayerScripts.Items.Add(SetPlayerPath);
-            }
-
-            //BDmenuItem.Items.Add(ChangeNodeColors);
-            //Utils.LogMessage("Loading Menu Items: Chang Node Colors Completed");
-            //BDmenuItem.Items.Add(BatchRemoveTraceData);
-            //Utils.LogMessage("Loading Menu Items: Batch Remove Trace Data Completed");
             BDmenuItem.Items.Add(OrderPlayerInput);
             Utils.LogMessage("Loading Menu Items: Order Player Nodes Completed");
-            BDmenuItem.Items.Add(PlayerScripts);
-            Utils.LogMessage("Loading Menu Items: Player Scripts Completed");
 
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(new Separator());
@@ -613,8 +555,6 @@ namespace BeyondDynamo
             BDmenuItem.Items.Add(GroupColor);
             BDmenuItem.Items.Add(EditNotes);
             BDmenuItem.Items.Add(AutomaticPreviewOff);
-            //BDmenuItem.Items.Add(EvaluateGroup);
-            //BDmenuItem.Items.Add(DeselectNodeLabels);
 
             #endregion
 
