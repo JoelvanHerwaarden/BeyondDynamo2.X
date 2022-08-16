@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:BeyondDynamo.UI"
-             mc:Ignorable="d" Width="223.764" Height="422.2" Background="{DynamicResource MainBackground}" Title="Rename Python Inputs" MinWidth="275" MinHeight="435" ResizeMode="CanResize" WindowStartupLocation="CenterScreen">
+             mc:Ignorable="d" Width="350" Height="422.2" Background="{DynamicResource MainBackground}" Title="Rename Python Inputs" MinWidth="275" MinHeight="435" ResizeMode="CanResize" WindowStartupLocation="CenterScreen">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>

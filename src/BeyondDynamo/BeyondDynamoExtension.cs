@@ -214,7 +214,7 @@ namespace BeyondDynamo
         {
             get
             {
-                return 1.4;
+                return 1.5;
             }
         }
 
@@ -493,12 +493,12 @@ namespace BeyondDynamo
                 Content = "This lets you select a Dynamo File and it will import the contents of that script inside the current workspace"
             };
 
-            RenamePythonInputs = new MenuItem { Header = "Rename Python Inputs" };
+            RenamePythonInputs = new MenuItem { Header = "Rename Python / List Create Inputs" };
             RenamePythonInputs.Click += (sender, args) =>
             {
-                BeyondDynamoFunctions.RenamePythonInputs();
+                BeyondDynamoFunctions.RenamePythonListInputs();
             };
-            RenamePythonInputs.ToolTip = new ToolTip() { Content = "Rename the Input names and the Output name for a Python Node to make them more descriptive" };
+            RenamePythonInputs.ToolTip = new ToolTip() { Content = "Rename the Input names and the Output name for a Python or List Create Node to make them more descriptive" };
 
 
             EditNotes = new MenuItem { Header = "Edit Note Text" };

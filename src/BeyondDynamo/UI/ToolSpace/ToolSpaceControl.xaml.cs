@@ -135,7 +135,7 @@ namespace BeyondDynamo.UI
 
         private void PythonRenameButton_Click(object sender, RoutedEventArgs e)
         {
-            BeyondDynamoFunctions.RenamePythonInputs();
+            BeyondDynamoFunctions.RenamePythonListInputs();
         }
 
         private void ImportDYNGraphButton_Click(object sender, RoutedEventArgs e)

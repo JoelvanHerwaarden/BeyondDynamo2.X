@@ -37,18 +37,18 @@ namespace BeyondDynamo.UI
         private string Output { get; set; }
         private PortModel EndConnectorPort { get; set; }
 
-        public InputsWindow(NodeViewModel nodeView)
+        public InputsWindow(NodeViewModel nodeView, bool pythonNode)
         {
             InitializeComponent();
             this.Owner = BeyondDynamo.Utils.DynamoWindow;
-            this.Title = "Rename Python Inputs for " + nodeView.NodeLogic.Name;
+            this.Title = "Rename Inputs for " + nodeView.NodeLogic.Name;
             this.Node = nodeView.NodeLogic;
             this.NodeView = nodeView;
-            GetInOutputs(this.Node);
+            GetInOutputs(this.Node, pythonNode);
             PopulateWindow(this.Inputs, this.Output);
         }
 
-        private void GetInOutputs(NodeModel node)
+        private void GetInOutputs(NodeModel node, bool pythonNode)
         {
             GetInOutConnectors(node);
             this.Inputs = new List<string>();
@@ -58,9 +58,12 @@ namespace BeyondDynamo.UI
                 PortModel portModel = node.InPorts[i];
                 this.Inputs.Add(portModel.Name);
                 string toolTip = portModel.ToolTip;
-                if(!toolTip.Contains("You can reference"))
+                if (pythonNode)
                 {
-                    toolTip += string.Format("\nYou can reference this input with IN[{0}] in the Python Script", i.ToString());
+                    if (!toolTip.Contains("You can reference"))
+                    {
+                        toolTip += string.Format("\nYou can reference this input with IN[{0}] in the Python Script", i.ToString());
+                    }
                 }
                 this.InputToolTips.Add(toolTip);
             }

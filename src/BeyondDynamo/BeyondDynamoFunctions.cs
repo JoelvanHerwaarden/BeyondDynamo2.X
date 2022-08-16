@@ -910,7 +910,7 @@ namespace BeyondDynamo
             }
         }
 
-        public static void RenamePythonInputs()
+        public static void RenamePythonListInputs()
         {
             DynamoViewModel VM = BeyondDynamo.Utils.DynamoVM;
             //Check if we are in an active graph
@@ -928,9 +928,16 @@ namespace BeyondDynamo
                 if (nodeView.NodeModel.IsSelected)
                 {
                     string type = nodeView.NodeModel.GetType().Name;
+
                     if(type == "PythonNode" | type == "PythonStringNode")
                     {
-                        InputsWindow inputsWindow = new InputsWindow(nodeView);
+                        InputsWindow inputsWindow = new InputsWindow(nodeView, true);
+                        inputsWindow.Show();
+                        selected += 1;
+                    }
+                    else if (type == "CreateList")
+                    {
+                        InputsWindow inputsWindow = new InputsWindow(nodeView, false);
                         inputsWindow.Show();
                         selected += 1;
                     }
@@ -938,9 +945,40 @@ namespace BeyondDynamo
             }
             if (selected == 0)
             {
-                MessageBox.Show("No Python Node Selected\nSelect a Python node to use this function");
+                MessageBox.Show("No Valid Nodes Selected\nSelect a Python or List Create node to use this function");
             }
         }
+
+        //public static void AutoRenamePythonListInputs()
+        //{
+        //    DynamoViewModel VM = BeyondDynamo.Utils.DynamoVM;
+        //    //Check if we are in an active graph
+        //    if (VM.Workspaces.Count < 1)
+        //    {
+        //        Forms.MessageBox.Show("This command can only run in an active graph.\nPlease open a Dynamo Graph to use this function.", "Beyond Dynamo");
+        //        return;
+        //    }
+        //    WorkspaceViewModel currentWorkspaceView = VM.CurrentSpaceViewModel;
+
+        //    WorkspaceModel currentWorkspace = currentWorkspaceView.Model;
+        //    int selected = 0;
+        //    foreach (NodeViewModel nodeView in currentWorkspaceView.Nodes)
+        //    {
+        //        if (nodeView.NodeModel.IsSelected)
+        //        {
+        //            string type = nodeView.NodeModel.GetType().Name;
+
+        //            if (type == "PythonNode" | type == "PythonStringNode"| type == "CreateList")
+        //            {
+        //                selected += 1;
+        //            }
+        //        }
+        //    }
+        //    if (selected == 0)
+        //    {
+        //        Forms.MessageBox.Show("This command can only run in an active graph.\nPlease open a Dynamo Graph to use this function.", "Beyond Dynamo");
+        //    }
+        //}
 
         public static void AutoNodePreview(NodeModel node, bool hide = true)
         {
