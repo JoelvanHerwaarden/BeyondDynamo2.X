@@ -14,6 +14,7 @@ using Dynamo.Graph;
 using Dynamo.Graph.Workspaces;
 using Dynamo.UI.Commands;
 using Dynamo.Graph.Annotations;
+using BeyondDynamo.Utils;
 
 namespace BeyondDynamo.UI
 {
@@ -40,7 +41,7 @@ namespace BeyondDynamo.UI
         public ToolSpaceControl()
         {
             InitializeComponent();
-            DynamoViewModel viewmodel = BeyondDynamo.Utils.DynamoVM;
+            DynamoViewModel viewmodel = BeyondDynamoUtils.DynamoVM;
             //viewmodel.Model.RefreshCompleted += EvaluateGraph;
 
             //Get the nodes in the current workspace
@@ -92,7 +93,7 @@ namespace BeyondDynamo.UI
 
         private void ColorButton_Click(object sender, RoutedEventArgs e)
         {
-            List<AnnotationModel> selectedGroups = BeyondDynamoFunctions.GetAllSelectedGroups();
+            List<AnnotationModel> selectedGroups = BeyondDynamoUtils.GetAllSelectedGroups();
             Button button = (Button)sender;
             SolidColorBrush color = (SolidColorBrush)button.Foreground;
             System.Drawing.Color newColor = System.Drawing.Color.FromArgb(color.Color.A,
@@ -129,7 +130,7 @@ namespace BeyondDynamo.UI
 
         private void FreezeButton_Click(object sender, RoutedEventArgs e)
         {
-            DynamoModel dynamoModel = BeyondDynamo.Utils.DynamoVM.Model;
+            DynamoModel dynamoModel = BeyondDynamoUtils.DynamoVM.Model;
             FreezeNodesCommand.FreezeNodes();
         }
 
@@ -140,19 +141,19 @@ namespace BeyondDynamo.UI
 
         private void ImportDYNGraphButton_Click(object sender, RoutedEventArgs e)
         {
-            DynamoViewModel viewmodel = BeyondDynamo.Utils.DynamoVM;
+            DynamoViewModel viewmodel = BeyondDynamoUtils.DynamoVM;
             BeyondDynamoFunctions.ImportFromScript(viewmodel);
         }
 
         private void SpecialColorButton_Click(object sender, RoutedEventArgs e)
         {
-            List<AnnotationModel> selectedGroups = BeyondDynamoFunctions.GetAllSelectedGroups();
+            List<AnnotationModel> selectedGroups = BeyondDynamoUtils.GetAllSelectedGroups();
             BeyondDynamoFunctions.ChangeGroupColor(selectedGroups);
         }
 
         private void PreviewButton_Click(object sender, RoutedEventArgs e)
         {
-            DynamoModel dynamoModel = BeyondDynamo.Utils.DynamoVM.Model;
+            DynamoModel dynamoModel = BeyondDynamoUtils.DynamoVM.Model;
             PreviewNodesCommand.PreviewNodes();
         }
 
@@ -207,7 +208,7 @@ namespace BeyondDynamo.UI
         {
             this.Dispatcher.Invoke(() =>
             {
-                DynamoViewModel DynamoViewModel = BeyondDynamo.Utils.DynamoVM;
+                DynamoViewModel DynamoViewModel = BeyondDynamoUtils.DynamoVM;
                 nodes = (List<NodeModel>)DynamoViewModel.CurrentSpace.Nodes;
                 this.nodeLabels.Clear();
                 this.foundNodes.Clear();

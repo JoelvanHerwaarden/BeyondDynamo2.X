@@ -1,4 +1,5 @@
-﻿using Dynamo.Graph.Nodes;
+﻿using BeyondDynamo.Utils;
+using Dynamo.Graph.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,10 +46,10 @@ namespace BeyondDynamo.UI
         private void ZoomToFit(object sender, MouseButtonEventArgs e)
         {
             //Run the Command twice for a better Result. 
-            BeyondDynamo.Utils.DynamoVM.CurrentSpaceViewModel.FindByIdCommand.Execute(this.NodeModel.GUID);
-            BeyondDynamo.Utils.DynamoVM.FitViewCommand.Execute(BeyondDynamo.Utils.DynamoVM);
-            BeyondDynamo.Utils.DynamoVM.CurrentSpaceViewModel.FindByIdCommand.Execute(this.NodeModel.GUID);
-            BeyondDynamo.Utils.DynamoVM.FitViewCommand.Execute(BeyondDynamo.Utils.DynamoVM);
+            BeyondDynamoUtils.DynamoVM.CurrentSpaceViewModel.FindByIdCommand.Execute(this.NodeModel.GUID);
+            BeyondDynamoUtils.DynamoVM.FitViewCommand.Execute(BeyondDynamoUtils.DynamoVM);
+            BeyondDynamoUtils.DynamoVM.CurrentSpaceViewModel.FindByIdCommand.Execute(this.NodeModel.GUID);
+            BeyondDynamoUtils.DynamoVM.FitViewCommand.Execute(BeyondDynamoUtils.DynamoVM);
         }
 
         private void UserControl_MouseEnter(object sender, MouseEventArgs e)

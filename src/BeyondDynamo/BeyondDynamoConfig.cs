@@ -5,9 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Dynamo.Graph.Annotations;
+using Dynamo.Graph.Nodes;
+using Dynamo.Graph.Notes;
+using Dynamo.Graph;
+using Dynamo.Models;
 using Dynamo.ViewModels;
 using Newtonsoft.Json.Linq;
 using Forms = System.Windows.Forms;
+using BeyondDynamo.Utils;
 
 namespace BeyondDynamo
 {
@@ -37,7 +43,7 @@ namespace BeyondDynamo
                     try
                     {
                         string hidePreview = config["hideNodePreview"].ToString();
-                        Utils.LogMessage(hidePreview);
+                        BeyondDynamoUtils.LogMessage(hidePreview);
                         if (Boolean.Parse(hidePreview))
                         {
                             hideNodePreview = true;
@@ -49,10 +55,9 @@ namespace BeyondDynamo
                     }
                     catch(Exception exception)
                     {
-                        Utils.LogMessage("Error Hide Node Previews: " + exception.Message);
+                        BeyondDynamoUtils.LogMessage("Error Hide Node Previews: " + exception.Message);
                         hideNodePreview = false;
                     }
-                    
                 }
             }
             else
@@ -74,50 +79,4 @@ namespace BeyondDynamo
         }
     }
 
-    public class Utils
-    {
-        public static Window DynamoWindow = null;
-        public static DynamoViewModel DynamoVM = null;
-        public static bool AutomaticHide = false;
-        private static string fileName = "BeyondDynamo.Log";
-        private static string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Dynamo\BeyondDynamoSettings");
-        private static string filePath = Path.Combine(folderPath, fileName);
-
-        public static void SetupLog(string FileName = null)
-        {
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-            if (FileName != null)
-            {
-                fileName = FileName;
-                filePath = Path.Combine(folderPath, fileName);
-            }
-
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-            }
-            LogMessage("New Log file created");
-        }
-        public static void LogMessage(string message)
-        {
-            using (StreamWriter streamWriter = new StreamWriter(filePath, true))
-            {
-                string time = DateTime.Now.ToString("HH:mm:ss");
-                string msg = time + ": " + message;
-                streamWriter.WriteLine(msg);
-                if(DynamoVM != null)
-                {
-                    DynamoVM.WriteToLogCmd.Execute(msg);
-                }
-            }
-        }
-        public static void OpenLog()
-        {
-            System.Diagnostics.Process.Start(filePath);
-        }
-
-    }
 }

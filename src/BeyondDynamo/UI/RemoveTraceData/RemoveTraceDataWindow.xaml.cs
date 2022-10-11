@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using Dynamo.ViewModels;
 using System;
+using BeyondDynamo.Utils;
 
 namespace BeyondDynamo.UI
 {
@@ -70,13 +71,13 @@ namespace BeyondDynamo.UI
                 string filePath = Path.Combine(selectedDirectory, fileName);
 
                 //Check is one of the selected files is not open
-                if(BeyondDynamoFunctions.IsFileOpen(this.viewModel, filePath))
+                if(BeyondDynamoUtils.IsFileOpen(this.viewModel, filePath))
                 {
                     System.Windows.Forms.MessageBox.Show("Please close the File before opening it", "Close file");
                     continue;
                 }
 
-                string coreLanguage = BeyondDynamoFunctions.DynamoCoreLanguage(filePath);
+                string coreLanguage = BeyondDynamoUtils.DynamoCoreLanguage(filePath);
                 bool succes = false;
                 if (coreLanguage == "XML")
                 {

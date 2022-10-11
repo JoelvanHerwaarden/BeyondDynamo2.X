@@ -293,6 +293,7 @@
     <Compile Include="BeyondDynamoConfig.cs" />
     <Compile Include="BeyondDynamoExtension.cs" />
     <Compile Include="BeyondDynamoToolSpaceView.cs" />
+    <Compile Include="BeyondDynamoUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BeyondDynamoFunctions.cs" />
     <Compile Include="resources.Designer.cs">
@@ -382,8 +383,7 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetDir)$(ProjectName).dll" "C:\Program Files\Autodesk\DynamoSandbox\DynamoCoreRuntime2.15.0"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="packages\Fody.6.5.5\build\Fody.targets" Condition="Exists('packages\Fody.6.5.5\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -1,4 +1,5 @@
-﻿using Dynamo.Graph.Notes;
+﻿using BeyondDynamo.Utils;
+using Dynamo.Graph.Notes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace BeyondDynamo
             this.Note = note;
             InitialText = Note.Text;
             InitializeComponent();
-            this.Owner = Utils.DynamoWindow;
+            this.Owner = BeyondDynamoUtils.DynamoWindow;
             textBox.Text = InitialText;
             Accepted = false;
         }

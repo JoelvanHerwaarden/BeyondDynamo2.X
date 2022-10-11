@@ -15,6 +15,8 @@ using Dynamo.Graph.Nodes;
 using System.Windows;
 using System.Windows.Input;
 using Dynamo.Graph.Annotations;
+using BeyondDynamo.Utils;
+using System.Collections.ObjectModel;
 
 namespace BeyondDynamo
 {
@@ -95,6 +97,11 @@ namespace BeyondDynamo
         private MenuItem PreviewNodes;
 
         /// <summary>
+        /// Freeze Multiple Nodes Menu Item
+        /// </summary>
+        private MenuItem ToggleNodeLabels;
+
+        /// <summary>
         /// Order Player Inputs Menu Item
         /// </summary>
         private MenuItem OrderPlayerInput;
@@ -135,8 +142,8 @@ namespace BeyondDynamo
 
         public void Startup(ViewStartupParams p)
         {
-            Utils.SetupLog();
-            Utils.LogMessage("Get Latest version Started...");
+            BeyondDynamoUtils.SetupLog();
+            BeyondDynamoUtils.LogMessage("Get Latest version Started...");
             try
             {
 
@@ -167,21 +174,21 @@ namespace BeyondDynamo
                 }
                 releasedVersions.Sort();
                 this.latestVersion = releasedVersions[releasedVersions.Count - 1];
-                Utils.LogMessage("Get Latest verion Completed!");
+                BeyondDynamoUtils.LogMessage("Get Latest verion Completed!");
             }
             catch(Exception e)
             {
-                Utils.LogMessage("Get Latest verion Failed!\n" + e.Message);
+                BeyondDynamoUtils.LogMessage("Get Latest verion Failed!\n" + e.Message);
                 this.latestVersion = this.currentVersion;
             }
-            Utils.LogMessage("Latest version = " + this.latestVersion.ToString()); ;
+            BeyondDynamoUtils.LogMessage("Latest version = " + this.latestVersion.ToString()); ;
 
-            Utils.LogMessage("Creating Configuration File Started...");
+            BeyondDynamoUtils.LogMessage("Creating Configuration File Started...");
             Directory.CreateDirectory(configFolderPath);
             config = new BeyondDynamoConfig(this.configFilePath);
             BeyondDynamoConfig.Current = config;
 
-            Utils.LogMessage("Creating Configuration File Completed!");
+            BeyondDynamoUtils.LogMessage("Creating Configuration File Completed!");
         }
 
         public void Shutdown()
@@ -227,12 +234,12 @@ namespace BeyondDynamo
         {
             BDmenuItem = new MenuItem { Header = "Beyond Dynamo" };
             DynamoViewModel VM = p.DynamoWindow.DataContext as DynamoViewModel;
-            BeyondDynamo.Utils.DynamoWindow = p.DynamoWindow;
+            BeyondDynamoUtils.DynamoWindow = p.DynamoWindow;
 
-            Utils.DynamoVM = VM;
-            Utils.LogMessage("Loading Menu Items Started...");
+            BeyondDynamoUtils.DynamoVM = VM;
+            BeyondDynamoUtils.LogMessage("Loading Menu Items Started...");
 
-            Utils.LogMessage("Loading Menu Items: Latest Version Started...");
+            BeyondDynamoUtils.LogMessage("Loading Menu Items: Latest Version Started...");
             LatestVersion = new MenuItem { Header = "New version available! Download now!" };
             LatestVersion.Click += (sender, args) =>
             {
@@ -242,13 +249,13 @@ namespace BeyondDynamo
             {
                 BDmenuItem.Items.Add(LatestVersion);
             }
-            else { Utils.LogMessage("Loading Menu Items: Latest Version is installed"); }
+            else { BeyondDynamoUtils.LogMessage("Loading Menu Items: Latest Version is installed"); }
 
-            Utils.LogMessage("Loading Menu Items: Latest Version Completed");
+            BeyondDynamoUtils.LogMessage("Loading Menu Items: Latest Version Completed");
 
             #region THIS CAN BE RUN ANYTIME
 
-            Utils.LogMessage("Loading Menu Items: Chang Node Colors Started...");
+            BeyondDynamoUtils.LogMessage("Loading Menu Items: Chang Node Colors Started...");
             ChangeNodeColors = new MenuItem { Header = "Change Node Color" };
             ChangeNodeColors.Click += (sender, args) =>
             {
@@ -259,7 +266,7 @@ namespace BeyondDynamo
                 ChangeNodeColorsWindow colorWindow = new ChangeNodeColorsWindow(dynamoUI, config)
                 {
                     // Set the owner of the window to the Dynamo window.
-                    Owner = BeyondDynamo.Utils.DynamoWindow
+                    Owner = BeyondDynamoUtils.DynamoWindow
                 };
                 colorWindow.Left = colorWindow.Owner.Left + 400;
                 colorWindow.Top = colorWindow.Owner.Top + 200;
@@ -272,7 +279,7 @@ namespace BeyondDynamo
                 Content = "This lets you change the Node Color Settings in your Dynamo nodes in In-Active, Active, Warning and Error state"
             };
 
-            Utils.LogMessage("Loading Menu Items: Batch Remove Trace Data Started...");
+            BeyondDynamoUtils.LogMessage("Loading Menu Items: Batch Remove Trace Data Started...");
             BatchRemoveTraceData = new MenuItem { Header = "Remove Session Trace Data from Dynamo Graphs" };
             BatchRemoveTraceData.Click += (sender, args) =>
             {
@@ -298,7 +305,7 @@ namespace BeyondDynamo
                 "\nIt can slow your scripts down if you run them because it first tries the regain the last session in which it was used."
             };
 
-            Utils.LogMessage("Loading Menu Items: Order Player Nodes Started...");
+            BeyondDynamoUtils.LogMessage("Loading Menu Items: Order Player Nodes Started...");
             OrderPlayerInput = new MenuItem { Header = "Order Input/Output Nodes" };
             OrderPlayerInput.Click += (sender, args) =>
             {
@@ -307,7 +314,7 @@ namespace BeyondDynamo
                 fileDialog.Filter = "Dynamo Files (*.dyn)|*.dyn";
                 if (fileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    if (BeyondDynamoFunctions.IsFileOpen(VM, fileDialog.FileName))
+                    if (BeyondDynamoUtils.IsFileOpen(VM, fileDialog.FileName))
                     {
                         Forms.MessageBox.Show("Please close the file before using this command", "Order Input/Output Nodes");
                         return;
@@ -341,7 +348,7 @@ namespace BeyondDynamo
 
 
             BDmenuItem.Items.Add(OrderPlayerInput);
-            Utils.LogMessage("Loading Menu Items: Order Player Nodes Completed");
+            BeyondDynamoUtils.LogMessage("Loading Menu Items: Order Player Nodes Completed");
 
             BDmenuItem.Items.Add(new Separator());
             BDmenuItem.Items.Add(new Separator());
@@ -413,7 +420,7 @@ namespace BeyondDynamo
             GroupColor = new MenuItem { Header = "Change Group Color" };
             GroupColor.Click += (sender, args) =>
             {
-                List<AnnotationModel> selectedGroups = BeyondDynamo.BeyondDynamoFunctions.GetAllSelectedGroups();
+                List<AnnotationModel> selectedGroups = BeyondDynamoUtils.GetAllSelectedGroups();
                 this.config = BeyondDynamo.BeyondDynamoFunctions.ChangeGroupColor(selectedGroups) ;
             };
             GroupColor.ToolTip = new ToolTip()
@@ -467,9 +474,9 @@ namespace BeyondDynamo
             {
                 FreezeNodesCommand.FreezeNodes();
             };
-            Utils.DynamoWindow.CommandBindings.Add(new CommandBinding(command));
+            BeyondDynamoUtils.DynamoWindow.CommandBindings.Add(new CommandBinding(command));
             KeyGesture shortkey = new KeyGesture(Key.E, System.Windows.Input.ModifierKeys.Control); ;
-            Utils.DynamoWindow.InputBindings.Add(new InputBinding(command, shortkey));
+            BeyondDynamoUtils.DynamoWindow.InputBindings.Add(new InputBinding(command, shortkey));
             FreezeNodes.ToolTip = new ToolTip()
             {
                 Content = "Freezes or Unfreezes all selected nodes and groups"
@@ -483,18 +490,34 @@ namespace BeyondDynamo
             {
                 PreviewNodesCommand.PreviewNodes();
             };
-            Utils.DynamoWindow.CommandBindings.Add(new CommandBinding(previewCommand));
+            BeyondDynamoUtils.DynamoWindow.CommandBindings.Add(new CommandBinding(previewCommand));
             KeyGesture previewShortKey = new KeyGesture(Key.Q, System.Windows.Input.ModifierKeys.Control); ;
-            Utils.DynamoWindow.InputBindings.Add(new InputBinding(previewCommand, previewShortKey));
+            BeyondDynamoUtils.DynamoWindow.InputBindings.Add(new InputBinding(previewCommand, previewShortKey));
             PreviewNodes.ToolTip = new ToolTip()
             {
                 Content = "Toggle the preview on and off for multiple nodes"
             };
 
+
+            ToggleNodeLabels = new MenuItem { Header = "Show / Hide Node Labels" };
+            ShowNodeLabelsCommand showLabelsCommand = new ShowNodeLabelsCommand();
+            ToggleNodeLabels.Click += (sender, args) =>
+            {
+                ShowNodeLabelsCommand.ShowNodeLabels();
+            };
+            ToggleNodeLabels.ToolTip = new ToolTip()
+            {
+                Content = "Show or Hide the labels for multiple nodes"
+            };
+            //ToggleNodeLabels.InputGestureText = "Ctrl+R";
+            //BeyondDynamoUtils.DynamoWindow.CommandBindings.Add(new CommandBinding(previewCommand));
+            //KeyGesture showLabelsShortKey = new KeyGesture(Key.R, System.Windows.Input.ModifierKeys.Control); ;
+            //BeyondDynamoUtils.DynamoWindow.InputBindings.Add(new InputBinding(previewCommand, previewShortKey));
+
             MenuItem EvaluateGroup = new MenuItem { Header = "Eval Group" };
             EvaluateGroup.Click += (sender, args) =>
             {
-                BeyondDynamoFunctions.GetAllSelectedUngroupedItems();
+                BeyondDynamoUtils.GetAllSelectedUngroupedItems();
             };
             
 
@@ -522,7 +545,7 @@ namespace BeyondDynamo
 
             AutomaticPreviewOff = new MenuItem { Header = "Automatic Preview Off" };
             AutomaticPreviewOff.IsChecked = config.hideNodePreview;
-            BeyondDynamo.Utils.AutomaticHide = AutomaticPreviewOff.IsChecked;
+            BeyondDynamoUtils.AutomaticHide = AutomaticPreviewOff.IsChecked;
             if (AutomaticPreviewOff.IsChecked)
             {
                 VM.CurrentSpace.NodeAdded += BeyondDynamoFunctions.AutoNodePreviewOff;
@@ -551,11 +574,24 @@ namespace BeyondDynamo
             BDmenuItem.Items.Add(RemoveBindingsCurrent);
             BDmenuItem.Items.Add(PreviewNodes);
             BDmenuItem.Items.Add(FreezeNodes);
+            BDmenuItem.Items.Add(ToggleNodeLabels); 
             BDmenuItem.Items.Add(RenamePythonInputs);
             BDmenuItem.Items.Add(GroupColor);
             BDmenuItem.Items.Add(EditNotes);
             BDmenuItem.Items.Add(AutomaticPreviewOff);
 
+
+            #endregion
+
+            #region TEST
+
+            MenuItem TestItem = new MenuItem { Header = "TEST Show Node List" };
+            TestItem.Click += (sender, args) =>
+            {
+                ObservableCollection<NodeViewModel> nodeViewModels = VM.CurrentSpaceViewModel.Nodes;
+                BeyondDynamo.BeyondDynamoFunctions.ShowNodeList(nodeViewModels);
+            };
+            BDmenuItem.Items.Add(TestItem);
             #endregion
 
             BDmenuItem.Items.Add(new Separator());
@@ -577,7 +613,7 @@ namespace BeyondDynamo
             OpenLog = new MenuItem() { Header = "Open Beyond Dynamo Log" };
             OpenLog.Click += (sender, args) =>
             {
-                Utils.OpenLog();
+                BeyondDynamoUtils.OpenLog();
             };
             OpenLog.ToolTip = new ToolTip() { Content = "Opens the Log file for Beyond Dynamo. \nThis is where all the activities are logged for Beyond Dynamo." };
             //BDmenuItem.Items.Add(OpenLog);
@@ -588,7 +624,7 @@ namespace BeyondDynamo
 
             #endregion ADD GRAPH DESCRIPTION
 
-            Utils.LogMessage("Loading all Menu Items Completed");
+            BeyondDynamoUtils.LogMessage("Loading all Menu Items Completed");
         }
     }
 }

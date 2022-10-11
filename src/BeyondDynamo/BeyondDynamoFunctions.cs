@@ -18,6 +18,14 @@ using Dynamo.Engine;
 using BeyondDynamo.UI;
 using System.Windows.Input;
 using Dynamo.Graph;
+using Dynamo.Core;
+using Dynamo.Extensions;
+using Dynamo.UI.Controls;
+using System.Reflection;
+using BeyondDynamo.Utils;
+using Dynamo.Controls;
+using System.Windows.Media;
+using System.Collections.ObjectModel;
 
 namespace BeyondDynamo
 {
@@ -26,146 +34,6 @@ namespace BeyondDynamo
     /// </summary>
     public class BeyondDynamoFunctions
     {
-        /// <summary>
-        /// Sets the Current selection 
-        /// </summary>
-        /// <param name="model"></param>
-        public static void KeepSelection(DynamoModel model)
-        {
-            foreach(dynamic item in model.CurrentWorkspace.CurrentSelection)
-            {
-                model.AddToSelection(item);
-            }
-        }
-
-
-        public static Dictionary<string,dynamic> GetAllSelectedUngroupedItems()
-        {
-            DynamoViewModel VM = BeyondDynamo.Utils.DynamoVM;
-            WorkspaceViewModel currentViewModel = VM.CurrentSpaceViewModel;
-            Dictionary<string, dynamic> result = new Dictionary<string, dynamic>();
-            List<dynamic> selectedGroups = new List<dynamic>();
-            List<ModelBase> ungroupedItems = new List<ModelBase>();
-            List<NodeModel> ungroupedNodes = new List<NodeModel>();
-            List<NoteModel> ungroupedNotes = new List<NoteModel>();
-            List<Guid> GroupedItems = new List<Guid>();
-            foreach (AnnotationViewModel group in currentViewModel.Annotations)
-            {
-                if (group.AnnotationModel.IsSelected)
-                {
-                    selectedGroups.Add(group.AnnotationModel);
-                    foreach (ModelBase modelbase in group.Nodes)
-                    {
-                        GroupedItems.Add(modelbase.GUID);
-                    }
-                }
-            }
-            foreach(NodeViewModel node in currentViewModel.Nodes)
-            {
-                if(node.IsSelected && !GroupedItems.Contains(node.NodeModel.GUID))
-                {
-                    ungroupedItems.Add(node.NodeModel);
-                    ungroupedNodes.Add(node.NodeModel);
-                }
-            }
-
-            foreach (NoteViewModel note in currentViewModel.Notes)
-            {
-                if (note.IsSelected && !GroupedItems.Contains(note.Model.GUID))
-                {
-                    ungroupedItems.Add(note.Model);
-                    ungroupedNotes.Add(note.Model);
-                }
-            }
-            result.Add("SelectedGroups", selectedGroups);
-            result.Add("UngroupedItems", ungroupedItems);
-            result.Add("UngroupedNodes", ungroupedNodes);
-            result.Add("UngroupedNotes", ungroupedNotes);
-
-            return result;
-        }
-
-        public static List<AnnotationModel> GetAllSelectedGroups()
-        {
-            DynamoViewModel VM = BeyondDynamo.Utils.DynamoVM;
-
-            List<AnnotationModel> selectedGroups = new List<AnnotationModel>();
-            Dictionary<string,dynamic> result = GetAllSelectedUngroupedItems();
-            List<NodeModel> ungroupedNodes = (List<NodeModel>)result["UngroupedNodes"];
-            List<NoteModel> ungroupedNotes = (List<NoteModel>)result["UngroupedNotes"];
-
-
-            //if (ungroupedNodes.Count > 0 || ungroupedNotes.Count > 0)
-            //{
-            //    AnnotationModel newGroup = new AnnotationModel(ungroupedNodes, ungroupedNotes);
-            //    VM.Model.ExecuteCommand(new DynamoModel.CreateAnnotationCommand(newGroup.GUID, newGroup.AnnotationText, newGroup.X, newGroup.Y, true));
-
-            //    AnnotationViewModel newGroupViewModel = new AnnotationViewModel(VM.CurrentSpaceViewModel, newGroup);
-            //    newGroupViewModel.AnnotationText = "<Click here to edit the group title>";
-            //    VM.CurrentSpaceViewModel.Annotations.Add(newGroupViewModel);
-
-            //    selectedGroups.Add(newGroup);
-            //    foreach (NodeModel node in ungroupedNodes)
-            //    {
-            //        node.IsSelected = true;
-            //        NodeViewModel nodeView = BeyondDynamoFunctions.GetNodeViewModel(node);
-            //        if (VM.AddModelsToGroupModelCommand.CanExecute(node.GUID))
-            //        {
-            //            VM.AddModelsToGroupModelCommand.Execute(node.GUID);
-            //        }
-            //    }
-            //}
-
-            foreach (AnnotationViewModel viewGroup in VM.CurrentSpaceViewModel.Annotations)
-            {
-                if (viewGroup.AnnotationModel.IsSelected)
-                {
-                    selectedGroups.Add(viewGroup.AnnotationModel);
-                }
-            }
-            return selectedGroups;
-
-        }
-
-        /// <summary>
-        /// Checks if the selected file is already opened
-        /// </summary>
-        /// <param name="viewModel"></param>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public static bool IsFileOpen(DynamoViewModel viewModel, string filePath)
-        {
-            if(viewModel.Model.CurrentWorkspace.FileName == filePath)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Checks in which Language the Core String of Dynamo Script is
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public static string DynamoCoreLanguage(string filePath)
-        {
-            string coreString = File.ReadAllText(filePath);
-            if (coreString.StartsWith("<"))
-            {
-                return "XML";
-            }
-            else if (coreString.StartsWith("{"))
-            {
-                return "Json";
-            }
-            else
-            {
-                return "Unsupported";
-            }
-        }
 
         /// <summary>
         /// This function calls Both RemoveSessionTraceData and RemoveBindings, based on the Graph Version (1.3, 2.0)
@@ -173,7 +41,7 @@ namespace BeyondDynamo
         /// <param name="filePath"></param>
         public static void RemoveTraceData(string filePath)
         {
-            string version = DynamoCoreLanguage(filePath);
+            string version = BeyondDynamoUtils.DynamoCoreLanguage(filePath);
 
             if (version == "XML")
             {
@@ -279,7 +147,7 @@ namespace BeyondDynamo
                 //Get the selected filePath
                 string DynamoFilepath = fileDialog.FileName;
 
-                string version = DynamoCoreLanguage(DynamoFilepath);
+                string version = BeyondDynamoUtils.DynamoCoreLanguage(DynamoFilepath);
                 if (version == "XML")
                 {
                     ImportXMLDynamo(viewModel, DynamoFilepath);
@@ -608,8 +476,6 @@ namespace BeyondDynamo
         }
 
 
-
-
         /// <summary>
         /// Opens a Text editor window for each selected Note
         /// </summary>
@@ -631,7 +497,7 @@ namespace BeyondDynamo
             if (selectedNotes.Count == 0)
             {
                 System.Windows.MessageBox.Show("No Notes Selected", "Beyond Dynamo");
-                KeepSelection(model);
+                BeyondDynamoUtils.KeepSelection(model);
                 return;
             }
 
@@ -644,7 +510,7 @@ namespace BeyondDynamo
                     textBox.Show();
                 }
             }
-            KeepSelection(model);
+            BeyondDynamoUtils.KeepSelection(model);
         }
 
         /// <summary>
@@ -793,7 +659,7 @@ namespace BeyondDynamo
 
         public static void ChangePreviewStateOfSelectedNodes(bool hide)
         {
-            WorkspaceModel currentWorkspace = BeyondDynamo.Utils.DynamoVM.CurrentSpace;
+            WorkspaceModel currentWorkspace = BeyondDynamoUtils.DynamoVM.CurrentSpace;
             foreach(NodeModel node in currentWorkspace.Nodes)
             {
                 if (node.IsSelected)
@@ -912,7 +778,7 @@ namespace BeyondDynamo
 
         public static void RenamePythonListInputs()
         {
-            DynamoViewModel VM = BeyondDynamo.Utils.DynamoVM;
+            DynamoViewModel VM = BeyondDynamoUtils.DynamoVM;
             //Check if we are in an active graph
             if (VM.Workspaces.Count < 1)
             {
@@ -951,7 +817,7 @@ namespace BeyondDynamo
 
         //public static void AutoRenamePythonListInputs()
         //{
-        //    DynamoViewModel VM = BeyondDynamo.Utils.DynamoVM;
+        //    DynamoViewModel VM = BeyondDynamo.BeyondDynamoUtils.DynamoVM;
         //    //Check if we are in an active graph
         //    if (VM.Workspaces.Count < 1)
         //    {
@@ -992,18 +858,18 @@ namespace BeyondDynamo
             {
                 nodeView.ToggleIsVisibleCommand.Execute(node);
             }
-            Utils.LogMessage("Turning Node preview off for " + node.Name);
+            BeyondDynamoUtils.LogMessage("Turning Node preview off for " + node.Name);
         }
         public static void AutoNodePreviewOff(NodeModel node)
         {
             NodeViewModel nodeView = GetNodeViewModel(node);
             nodeView.ToggleIsVisibleCommand.Execute(node);
-            Utils.LogMessage("Turning Node preview off for " + node.Name);
+            BeyondDynamoUtils.LogMessage("Turning Node preview off for " + node.Name);
         }
         public static NodeViewModel GetNodeViewModel(NodeModel obj)
         {
             NodeViewModel nodeViewModel = null;
-            foreach(NodeViewModel nodeView in Utils.DynamoVM.CurrentSpaceViewModel.Nodes)
+            foreach(NodeViewModel nodeView in BeyondDynamoUtils.DynamoVM.CurrentSpaceViewModel.Nodes)
             {
                 if(nodeView.NodeModel.GUID == obj.GUID)
                 {
@@ -1012,6 +878,24 @@ namespace BeyondDynamo
                 }
             }
             return nodeViewModel;
+        }
+
+        public static void ShowNodeList(ObservableCollection<NodeViewModel> nodeViewModels)
+        {
+
+            Dictionary<string, NodeView> nodeViews = BeyondDynamoUtils.NodeViewDictionary();
+            foreach (NodeViewModel nodeViewModel in nodeViewModels)
+            {
+                //nodeViewModel.DynamoViewModel.ShowPreviewBubbles = false;
+                nodeViewModel.PreviewPinned = !nodeViewModel.PreviewPinned;
+                NodeView nodeView = nodeViews[nodeViewModel.NodeLogic.GUID.ToString()];
+                
+                PreviewControl previewControl = BeyondDynamoUtils.GetPrivateInteralField(nodeView, "previewControl");
+                previewControl.TransitionToState(PreviewControl.State.Hidden);
+                previewControl.BeginInit();
+                previewControl.EndInit();
+
+            }
         }
     }
 
@@ -1034,7 +918,7 @@ namespace BeyondDynamo
         /// <param name="model"></param>
         public static void FreezeNodes()
         {
-            DynamoModel model = BeyondDynamo.Utils.DynamoVM.Model;
+            DynamoModel model = BeyondDynamoUtils.DynamoVM.Model;
             WorkspaceModel workspace = model.CurrentWorkspace;
             List<dynamic> result = ShouldFreeze(workspace.Nodes);
             bool shouldFreeze = result[0];
@@ -1050,7 +934,7 @@ namespace BeyondDynamo
                     node.IsFrozen = false;
                 }
             }
-            BeyondDynamoFunctions.KeepSelection(model);
+            BeyondDynamoUtils.KeepSelection(model);
         }
 
         public static List<dynamic> ShouldFreeze(IEnumerable<NodeModel> nodes)
@@ -1126,16 +1010,16 @@ namespace BeyondDynamo
         /// <param name="model"></param>
         public static void PreviewNodes()
         {
-            DynamoModel model = BeyondDynamo.Utils.DynamoVM.Model;
+            DynamoModel model = BeyondDynamoUtils.DynamoVM.Model;
             WorkspaceModel workspace = model.CurrentWorkspace;
             List<NodeModel> nodes = ShouldPreview(workspace.Nodes);
             foreach (Dynamo.Graph.Nodes.NodeModel node in nodes)
             {
                 NodeViewModel nodeView = BeyondDynamoFunctions.GetNodeViewModel(node);
                 nodeView.ToggleIsVisibleCommand.Execute(node);
-                Utils.LogMessage("Changed Node preview for " + node.Name);
+                BeyondDynamoUtils.LogMessage("Changed Node preview for " + node.Name);
             }
-            BeyondDynamoFunctions.KeepSelection(model);
+            BeyondDynamoUtils.KeepSelection(model);
         }
 
         public static List<NodeModel> ShouldPreview(IEnumerable<NodeModel> nodes)
@@ -1176,4 +1060,85 @@ namespace BeyondDynamo
             return result;
         }
     }
+    public class ShowNodeLabelsCommand : ICommand
+    {
+        public event EventHandler CanExecuteChanged;
+
+        public bool CanExecute(object parameter)
+        {
+            return true;
+        }
+        public void Execute(object parameter)
+        {
+            ShowNodeLabels();
+        }
+
+        /// <summary>
+        /// Freezes a selection of nodes
+        /// </summary>
+        /// <param name="model"></param>
+        public static void ShowNodeLabels()
+        {
+            DynamoModel model = BeyondDynamoUtils.DynamoVM.Model;
+            WorkspaceModel workspace = model.CurrentWorkspace;
+            List<NodeModel> nodes = ShouldShowLabels(workspace.Nodes, out bool shouldShowLabels);
+            foreach (Dynamo.Graph.Nodes.NodeModel node in nodes)
+            {
+                NodeViewModel nodeView = BeyondDynamoFunctions.GetNodeViewModel(node);
+                if (shouldShowLabels)
+                {
+                    node.DisplayLabels = false ;
+                }
+                else
+                {
+                    node.DisplayLabels = true;
+                }
+                BeyondDynamoUtils.LogMessage("Changed Node preview for " + node.Name);
+            }
+            BeyondDynamoUtils.KeepSelection(model);
+        }
+
+        public static List<NodeModel> ShouldShowLabels(IEnumerable<NodeModel> nodes, out bool shouldShowLabels)
+        {
+            List<NodeModel> result = new List<NodeModel>();
+            List<NodeModel> shownNodes = new List<NodeModel>();
+            List<NodeModel> hiddenNodes = new List<NodeModel>();
+            foreach (NodeModel node in nodes)
+            {
+                if (node.IsSelected)
+                {
+                    if (node.DisplayLabels)
+                    {
+                        shownNodes.Add(node);
+                    }
+                    else
+                    {
+                        hiddenNodes.Add(node);
+                    }
+                }
+            }
+            if (shownNodes.Count == 0)
+            {
+                result = hiddenNodes;
+                shouldShowLabels = false;
+            }
+            else if (hiddenNodes.Count == 0)
+            {
+                result = shownNodes;
+                shouldShowLabels = true;
+            }
+            else if (shownNodes.Count > hiddenNodes.Count)
+            {
+                result = hiddenNodes;
+                shouldShowLabels = false;
+            }
+            else
+            {
+                result = shownNodes;
+                shouldShowLabels = true;
+            }
+            return result;
+        }
+    }
+
 }

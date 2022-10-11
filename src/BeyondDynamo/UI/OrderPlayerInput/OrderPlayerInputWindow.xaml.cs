@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using Dynamo.ViewModels;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json.Linq;
+using BeyondDynamo.Utils;
 
 namespace BeyondDynamo
 {
@@ -70,7 +71,7 @@ namespace BeyondDynamo
         public OrderPlayerInputWindow(Dictionary<string, string> inputNodes, Dictionary<string,string> outputNodes)
         {
             InitializeComponent();
-            Owner = BeyondDynamo.Utils.DynamoWindow;
+            Owner = BeyondDynamoUtils.DynamoWindow;
             this._InputNodes = inputNodes;
             this._OutputNodes = outputNodes;
 

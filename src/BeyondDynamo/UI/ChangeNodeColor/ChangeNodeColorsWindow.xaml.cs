@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BeyondDynamo.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -56,7 +57,7 @@ namespace BeyondDynamo.UI
         public ChangeNodeColorsWindow(System.Windows.ResourceDictionary DynamoNodeSettings, BeyondDynamoConfig beyondDynamoConfig)
         {
             InitializeComponent();
-            this.Owner = BeyondDynamo.Utils.DynamoWindow;
+            this.Owner = BeyondDynamoUtils.DynamoWindow;
             this.config = beyondDynamoConfig;
             this.dynamoNodeSettings = DynamoNodeSettings;
             this._ITitleText = (SolidColorBrush)dynamoNodeSettings["headerForegroundInactive"];

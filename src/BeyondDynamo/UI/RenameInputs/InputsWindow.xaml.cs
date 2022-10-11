@@ -20,6 +20,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Dynamo.ViewModels;
 using Dynamo.Utilities;
+using BeyondDynamo.Utils;
 
 namespace BeyondDynamo.UI
 {
@@ -40,7 +41,7 @@ namespace BeyondDynamo.UI
         public InputsWindow(NodeViewModel nodeView, bool pythonNode)
         {
             InitializeComponent();
-            this.Owner = BeyondDynamo.Utils.DynamoWindow;
+            this.Owner = BeyondDynamoUtils.DynamoWindow;
             this.Title = "Rename Inputs for " + nodeView.NodeLogic.Name;
             this.Node = nodeView.NodeLogic;
             this.NodeView = nodeView;
